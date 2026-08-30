@@ -18,6 +18,8 @@
     "test:watch": "vitest"
   },
   "dependencies": {
+    "@ai-sdk/google": "^3.0.118",
+    "ai": "^6.0.271",
     "gsap": "^3.15.0",
     "motion": "^13.1.1",
     "next": "15.5.24",
