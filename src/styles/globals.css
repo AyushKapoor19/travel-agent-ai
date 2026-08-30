@@ -1,0 +1,1470 @@
+@import 'tailwindcss';
+
+/* ===========================================================================
+   Theme
+   ---------------------------------------------------------------------------
+   Every colour utility resolves through a plain custom property rather than a
+   literal, so a subtree can redeclare the palette and everything inside it
+   follows. `data-tone="night"` is the only switch: there is not a single
+   `dark:` variant in the codebase, and a component never needs to know which
+   surface it was dropped onto.
+   =========================================================================== */
+
+@theme inline {
+  --font-sans: var(--font-dm-sans);
+  --font-mono: var(--font-dm-mono);
+
+  --color-ink: var(--ink);
+  --color-ink-soft: var(--ink-soft);
+  --color-ink-muted: var(--ink-muted);
+  --color-line: var(--line);
+  --color-accent: var(--accent);
+
+  /* Absolute surface colours. These name a specific paint, not a role, so they
+     stay fixed across tones — a divider filled with `night` must be the same
+     black whichever section it grows out of. */
+  --color-paper: #ffffff;
+  --color-paper-soft: #f2f2f0;
+  --color-night: #0a0a09;
+  --color-night-soft: #1b1b19;
+
+  --radius-glass: 1.5rem;
+  --radius-glass-sm: 1rem;
+
+  /* The size a question is asked at, shared with the slot that reserves room for it
+     — a min-height derived from a different number than the type it holds is a
+     min-height that stops matching at the next breakpoint. */
+  --ask-size: clamp(1.5rem, 2.7vw, 2.125rem);
+  --ask-leading: 1.16;
+
+  /* The one easing curve in the system. Slow to leave, decisive to arrive. */
+  --ease-wayfare: cubic-bezier(0.52, 0.01, 0.16, 1);
+  /* Steeper sibling, for things that are thrown rather than moved. */
+  --ease-liquid: cubic-bezier(0.5, 0, 0, 1);
+}
+
+/* --------------------------------------------------------------------------
+   Paper tone (default)
+   -------------------------------------------------------------------------- */
+
+:root {
+  color-scheme: light;
+
+  --ink: #0e0d0c;
+  --ink-soft: #45443f;
+  --ink-muted: #6f6d67;
+  --line: rgb(14 13 12 / 0.12);
+  --accent: #ffd400;
+
+  --surface: linear-gradient(90deg, #ffffff 0%, #f2f2f0 100%);
+
+  --glass-fill: rgb(255 255 255 / 0.62);
+  --glass-fill-strong: rgb(255 255 255 / 0.86);
+  --glass-fill-opaque: rgb(250 250 249 / 0.97);
+  --glass-hover: rgb(255 255 255 / 0.96);
+  --glass-rim: rgb(255 255 255 / 0.9);
+  --glass-edge: rgb(14 13 12 / 0.1);
+  --glass-shadow: 0 20px 48px -22px rgb(14 13 12 / 0.24);
+  --glass-sheen-top: rgb(255 255 255 / 0.55);
+  --glass-sheen-bottom: rgb(14 13 12 / 0.05);
+  --glass-user: rgb(14 13 12 / 0.07);
+  --glass-blur: 22px;
+
+  /* Primary action: maximum contrast against the surface it sits on, which
+     inverts with the tone. */
+  --btn-bg: #0e0d0c;
+  --btn-fg: #f8f8f6;
+  --btn-bg-hover: #35332e;
+
+  /* The agent's sphere, lit from the upper left. Obsidian on paper, moonstone
+     on night: one object, photographed under the room it is standing in. */
+  --orb-lit: #7a766e;
+  --orb-mid: #2b2926;
+  --orb-shadow: #0a0a09;
+  --orb-glow: rgb(14 13 12 / 0.16);
+
+  --shell: 1690px;
+  --shell-gutter: 6vw;
+
+  /* The header sits this far below the top edge, clear of a notch. */
+  --header-inset: 40px;
+
+  /* One panel of the landing page. Replaced with a frozen pixel height once the
+     scroller engages, because `dvh` resizes whenever a mobile address bar
+     collapses and a panel measured live lands short of the one it travelled to.
+     `dvh` remains the answer before JavaScript and wherever the scroller is
+     declined. */
+  --panel-h: 100dvh;
+}
+
+/* --------------------------------------------------------------------------
+   Night tone
+   -------------------------------------------------------------------------- */
+
+[data-tone='night'] {
+  color-scheme: dark;
+
+  --ink: #f6f5f2;
+  --ink-soft: #c2c0b8;
+  --ink-muted: #94918a;
+  --line: rgb(255 255 255 / 0.14);
+
+  --surface: linear-gradient(90deg, #0a0a09 0%, #1b1b19 100%);
+
+  /* On black the panel is defined by what it lets through, so the fill drops
+     to a film and the rim carries the edge. */
+  --glass-fill: rgb(255 255 255 / 0.05);
+  --glass-fill-strong: rgb(255 255 255 / 0.09);
+  --glass-fill-opaque: rgb(31 31 29 / 0.97);
+  --glass-hover: rgb(255 255 255 / 0.13);
+  --glass-rim: rgb(255 255 255 / 0.18);
+  --glass-edge: rgb(255 255 255 / 0.1);
+  --glass-shadow: 0 28px 64px -28px rgb(0 0 0 / 0.85);
+  --glass-sheen-top: rgb(255 255 255 / 0.14);
+  --glass-sheen-bottom: rgb(0 0 0 / 0.2);
+  --glass-user: rgb(255 255 255 / 0.11);
+
+  --btn-bg: #f6f5f2;
+  --btn-fg: #0e0d0c;
+  --btn-bg-hover: #ffffff;
+
+  --orb-lit: #ffffff;
+  --orb-mid: #d3d0c7;
+  --orb-shadow: #4b4942;
+  --orb-glow: rgb(255 255 255 / 0.22);
+}
+
+/* Phones have the least GPU headroom and the smallest panels, where a wide
+   blur radius is not visible anyway. */
+@media (max-width: 640px) {
+  :root {
+    --glass-blur: 14px;
+  }
+}
+
+/* A phone gives away less of its height to the header. */
+@media (max-width: 500px) {
+  :root {
+    --header-inset: 25px;
+  }
+}
+
+/* ===========================================================================
+   Base
+   =========================================================================== */
+
+@layer base {
+  html,
+  body {
+    height: 100%;
+  }
+
+  html {
+    scroll-behavior: smooth;
+  }
+
+  body {
+    background: #ffffff;
+    color: var(--ink);
+    font-family: var(--font-dm-sans), system-ui, sans-serif;
+    font-synthesis-weight: none;
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+  }
+
+  ::selection {
+    background: var(--accent);
+    color: #0e0d0c;
+  }
+
+  /* The ink outline inverts with the tone, so it is always the highest
+     contrast ring available on the surface underneath it. */
+  :focus-visible {
+    outline: 2px solid var(--ink);
+    outline-offset: 3px;
+    border-radius: 2px;
+  }
+
+  /* Numerals in prices and dates should not jitter as they stream in. */
+  :where(td, th) {
+    font-variant-numeric: tabular-nums;
+  }
+}
+
+/* ===========================================================================
+   Components
+   ---------------------------------------------------------------------------
+   Everything lives in the components layer. Unlayered rules beat every layer,
+   which would silently kill the Tailwind utilities these are composed with —
+   `bg-ink/20` on a rule, `opacity-40` on a blob, `hover:text-ink` on a link.
+   =========================================================================== */
+
+@layer components {
+  /* ------------------------------------------------------------------------
+     Surfaces
+     ------------------------------------------------------------------------ */
+
+  /* The section's own paint. Both variants span the full viewport width, so a
+     divider that repeats one of them lines its gradient up exactly with the
+     section it is joining. */
+  .surface {
+    background: var(--surface);
+  }
+
+  .surface-paper {
+    background: linear-gradient(90deg, #ffffff 0%, #f2f2f0 100%);
+  }
+
+  .surface-night {
+    background: linear-gradient(90deg, #0a0a09 0%, #1b1b19 100%);
+  }
+
+  /* Handing over to the conversation.
+
+     The panels are what paint the landing page's own surfaces; the backdrop in the root
+     layout is the paper underneath, and it is the same paper /chat is written on. So the
+     hand-off does not paint anything — it takes the panels away and lets what was always
+     behind them through, which is why the two routes do not flash at each other. */
+  [data-handoff] .panel {
+    opacity: 0;
+    transition: opacity 260ms var(--ease-wayfare);
+  }
+
+  /* The planet goes first, and faster than the screen it is on.
+     Everything else here is type on black, which is most of the way gone by the time the
+     panel is half faded; a lit sphere is not, so at the midpoint of an even dissolve the
+     globe is the only thing left and the eye follows it instead of leaving. */
+  [data-handoff] .globe-stage {
+    opacity: 0;
+    transition: opacity 160ms var(--ease-wayfare);
+  }
+
+  /* A film of noise. Flat black photographs as a void; a little grain gives it
+     a material. Invisible on paper, which is why it is only asked for on the
+     night sections. */
+  .grain::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    z-index: 0;
+    pointer-events: none;
+    opacity: 0.05;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='140' height='140' filter='url(%23n)'/%3E%3C/svg%3E");
+    background-size: 140px 140px;
+  }
+
+  .shell {
+    margin-inline: auto;
+    width: 100%;
+    max-width: var(--shell);
+    padding-inline: var(--shell-gutter);
+  }
+
+  /* The column the planning screen's content is set in: centred, with a reading
+     measure and its own padding.
+
+     Not the same box as `.shell`, and the difference is deliberate. The header spans
+     the window — it is furniture, and the wordmark belongs in the corner of the page
+     rather than in the corner of a column — while everything that is read sits in the
+     middle of the window, where a screen that is mostly one document wants it.
+
+     Kept off the scrolling element for a reason that is not obvious until it breaks: a
+     scroller only as wide as its text leaves the whole margin beside a document dead to
+     the wheel. So the scroller takes the full width and the measure lives on the
+     content inside it. */
+  .measure {
+    margin-inline: auto;
+    width: 100%;
+    max-width: 56rem;
+    padding-inline: 1.25rem;
+  }
+
+  @media (min-width: 640px) {
+    .measure {
+      padding-inline: 1.5rem;
+    }
+  }
+
+  /* ------------------------------------------------------------------------
+     Type
+     ------------------------------------------------------------------------ */
+
+  /* Display sizes are set tight and tracked in: at 6rem the default spacing
+     reads as gaps between letters rather than a word. */
+  .display-hero {
+    font-weight: 700;
+    font-size: clamp(2.75rem, 6.6vw, 5rem);
+    line-height: 0.94;
+    letter-spacing: -0.045em;
+  }
+
+  .display-lg {
+    font-weight: 700;
+    font-size: clamp(2rem, 4.4vw, 3.375rem);
+    line-height: 1.02;
+    letter-spacing: -0.035em;
+  }
+
+  .display-md {
+    font-weight: 600;
+    font-size: clamp(1.3125rem, 2vw, 1.75rem);
+    line-height: 1.14;
+    letter-spacing: -0.025em;
+  }
+
+  /* `display-lg` for a headline that has to share one viewport with everything
+     under it. The `vh` term is the whole point: a short laptop window is where
+     a purely width-based clamp overruns the panel it is sitting in. */
+  .display-panel {
+    font-weight: 700;
+    font-size: clamp(1.75rem, calc(2.6vw + 1.1vh), 3.25rem);
+    line-height: 1.02;
+    letter-spacing: -0.035em;
+  }
+
+  /* The size a question is asked at.
+     Between `display-md` and `display-lg`, and it exists because neither fits the
+     one job: the agent's question is one or two sentences that have to hold the
+     middle of an otherwise empty screen. At `display-md` it reads as a form
+     label, and at `display-lg` two sentences overrun the viewport on a laptop. */
+  .display-ask {
+    font-weight: 600;
+    font-size: var(--ask-size);
+    line-height: var(--ask-leading);
+    letter-spacing: -0.03em;
+  }
+
+  /* The question, hung from its last line rather than from its first.
+
+     A question is written a token at a time, so one that turns out to be four lines
+     long grows the block it is in — and with that block centred in the screen, the
+     line it gets answered on slides down two lines while the traveller is halfway
+     through reading it.
+
+     Reserving room for the longest question was the obvious fix and it does not work:
+     the model writes to its own length, and every reservation generous enough to hold
+     the longest one leaves the short ones floating in a field of white space. So the
+     block takes all the slack above the answer line instead and hangs its text from
+     the bottom of it. A question ends the same distance above the line it is answered
+     on whether it runs to one line or four, and the field never moves. */
+  .ask-slot {
+    display: grid;
+    align-content: end;
+  }
+
+  /* The counterweight to the display sizes: small, set a little heavier than the
+     copy around it and coloured back, so it annotates without competing.
+
+     Sentence case and normally tracked. It was uppercase at 0.2em, which reads as a
+     rule rather than as words — the point at the time — and that turned out to be
+     the problem once the planning surface leaned on it: a page introducing every
+     section, every field of the trip and every wait in spaced capitals is a page
+     shouting its own scaffolding, and it stopped matching the landing screens it
+     borrowed the style from. Weight and colour carry the same hierarchy and let a
+     label be read instead of decoded. */
+  .label {
+    font-family: var(--font-dm-sans), system-ui, sans-serif;
+    font-size: 0.75rem;
+    font-weight: 500;
+    letter-spacing: -0.005em;
+    line-height: 1.25;
+  }
+
+  .lede {
+    font-size: clamp(1rem, 0.95vw + 0.75rem, 1.1875rem);
+    line-height: 1.6;
+    letter-spacing: -0.011em;
+  }
+
+  /* Fades the tail of a long line instead of letting it collide with whatever
+     sits beside it. */
+  .mask-r {
+    --mask: linear-gradient(90deg, #000 0%, #000 72%, transparent 100%);
+    -webkit-mask-image: var(--mask);
+    mask-image: var(--mask);
+  }
+
+  /* ------------------------------------------------------------------------
+     Actions
+     ------------------------------------------------------------------------ */
+
+  .btn-primary {
+    background: var(--btn-bg);
+    color: var(--btn-fg);
+    transition: background-color 260ms var(--ease-wayfare);
+  }
+
+  .btn-primary:hover:not(:disabled) {
+    background: var(--btn-bg-hover);
+  }
+
+  .btn-primary:disabled {
+    cursor: not-allowed;
+    opacity: 0.35;
+  }
+
+  /* The composer's submit, and the only accent fill on the landing page. It is
+     the same yellow as the question mark in the headline above it, so pressing
+     it answers the question that mark asks.
+
+     Dulled rather than greyed out while the field is empty. Grey reads as "you
+     cannot"; a muted version of the same yellow reads as "not yet", which is
+     the honest state — nothing is wrong with the button, the sentence just is
+     not written. Mixed against `--ink-muted` rather than a fixed colour so the
+     dull end darkens on paper and lightens on night, keeping its distance from
+     whatever it is sitting on. */
+  .btn-accent {
+    background-color: color-mix(in oklab, var(--accent) 55%, var(--ink-muted));
+    /* Fixed dark, not `--btn-fg`: the label sits on yellow in either tone, and
+       yellow only ever takes dark text. */
+    color: var(--color-night);
+    transition: background-color 260ms var(--ease-wayfare);
+  }
+
+  /* Armed, which is not the same as enabled — it stays lit through the hand-off,
+     when the button is disabled because the trip is already opening. */
+  .btn-accent[data-armed] {
+    background-color: var(--accent);
+  }
+
+  .btn-accent[data-armed]:hover:not(:disabled) {
+    background-color: color-mix(in oklab, var(--accent) 88%, #ffffff);
+  }
+
+  .btn-accent:disabled:not([data-armed]) {
+    cursor: not-allowed;
+  }
+
+  /* Hairline pill. The whole secondary action vocabulary is one border. */
+  .btn-ghost {
+    border: 1px solid var(--line);
+    color: var(--ink-soft);
+    transition:
+      border-color 260ms var(--ease-wayfare),
+      color 260ms var(--ease-wayfare);
+  }
+
+  .btn-ghost:hover:not(:disabled) {
+    border-color: color-mix(in oklab, var(--ink) 40%, transparent);
+    color: var(--ink);
+  }
+
+  .btn-ghost:disabled {
+    cursor: not-allowed;
+    opacity: 0.35;
+  }
+
+  /* Selected chip. Reuses the primary fill so a chosen answer reads as the
+     same weight of decision as pressing the button. */
+  .chip-selected {
+    background: var(--btn-bg);
+    border-color: var(--btn-bg);
+    color: var(--btn-fg);
+  }
+
+  /* An underline that draws itself from the left on hover. Inline-block so the
+     rule measures the text rather than the line box it happens to sit in. */
+  .link-rule {
+    position: relative;
+    display: inline-block;
+    transition: color 260ms var(--ease-wayfare);
+  }
+
+  .link-rule::after {
+    content: '';
+    position: absolute;
+    left: 0;
+    bottom: -2px;
+    height: 1px;
+    width: 100%;
+    background: currentColor;
+    transform: scaleX(0);
+    transform-origin: left;
+    transition: transform 420ms var(--ease-wayfare);
+  }
+
+  .link-rule:hover::after,
+  .link-rule:focus-visible::after {
+    transform: scaleX(1);
+  }
+
+  /* ------------------------------------------------------------------------
+     Travel documents
+     ---------------------------------------------------------------------------
+     The planning surface is drawn as printed travel paper rather than as a
+     messaging app, and this is the vocabulary that does it: ruled lines, tracked
+     labels, tabular figures and a perforation. Between them they replace a
+     transcript of chat bubbles — which was the one part of this product that
+     looked like every other product with a language model behind it.
+
+     All of it is a hairline and a typeface. Nothing here paints a surface, adds a
+     hue or costs a composite, because the argument the rest of the page makes —
+     that hierarchy comes from size, weight and rules — is the same argument a
+     ticket makes.
+     ------------------------------------------------------------------------ */
+
+  /* Figures that are read as data rather than as prose: a step counter, a day
+     number, a price, a field of dates being filled in a character at a time.
+
+     Tabular figures in the body typeface, not a second one. A fixed advance is the
+     part that was load-bearing — a day numeral hanging in a margin has to sit on
+     the same axis for every day of the trip, and a price arriving mid-stream must
+     not shuffle the cells beside it — and `tabular-nums` buys that on its own. DM
+     Mono was buying it twice and charging a typeface for it: a total set in a
+     typewriter face reads as a receipt pasted into the page rather than as a line
+     of the page, which is the opposite of what the rest of this design does. It
+     stays where it is genuinely a different kind of text: code in a reply. */
+  .figure {
+    font-variant-numeric: tabular-nums;
+    letter-spacing: 0;
+  }
+
+  /* The perforation. The only dashed line in the product, and it means what it
+     means on a boarding pass: everything below this tears off and is the part you
+     keep. It divides the questions from the answers on the intake and the trip
+     from its fields on the finished plan. */
+  .tear {
+    border-top: 1px dashed color-mix(in oklab, var(--ink) 24%, transparent);
+  }
+
+  /* The line an answer is written on.
+     A rule rather than a box, which is the whole of the difference between
+     filling something in and typing into a chat. Darker than `--line` because
+     unlike every other hairline here this one is a target, and it takes the full
+     ink weight on focus rather than a ring — the field is the width of the
+     measure, and a 2px outline around it reads as an error state. */
+  .field-rule {
+    border-bottom: 1px solid color-mix(in oklab, var(--ink) 30%, transparent);
+    transition: border-color 300ms var(--ease-wayfare);
+  }
+
+  .field-rule:focus-within {
+    border-bottom-color: var(--ink);
+  }
+
+  /* A section heading: the name, then a hairline running out to the end of the
+     measure. Cheaper than a rule under the heading and it reads as a document
+     rather than a card, because the line ends where the column does.
+
+     The type is here rather than borrowed from `.label`, because the two want
+     different sizes now that neither is in capitals: a heading has to hold a rule
+     across the measure, and a field label has to sit under the value it names
+     without competing with it. Spaced capitals had been hiding that by making
+     everything the same shouted size. */
+  .section-rule {
+    display: flex;
+    align-items: center;
+    gap: 0.875rem;
+    font-family: var(--font-dm-sans), system-ui, sans-serif;
+    font-size: 0.8125rem;
+    font-weight: 500;
+    letter-spacing: -0.01em;
+    line-height: 1.25;
+  }
+
+  .section-rule::after {
+    content: '';
+    flex: 1 1 auto;
+    height: 1px;
+    background: var(--line);
+  }
+
+  /* The hand-off, as a footnote's link rather than a filled pill.
+     A plan can carry a dozen of these — three stays, four things to do, a fare —
+     and a dozen black buttons is what made the results read as a feed of widgets
+     stacked in a chat rather than as one printed page. Underlined text keeps the
+     link obvious and leaves the prose as the only thing on the page with weight. */
+  .link-out {
+    color: var(--ink-soft);
+    text-decoration-line: underline;
+    text-decoration-color: color-mix(in oklab, var(--ink) 25%, transparent);
+    text-underline-offset: 3px;
+    transition:
+      color 300ms var(--ease-wayfare),
+      text-decoration-color 300ms var(--ease-wayfare);
+  }
+
+  .link-out:hover {
+    color: var(--ink);
+    text-decoration-color: var(--ink);
+  }
+
+  /* Something a provider could not tell us, said in the margin.
+     Every one of these is an absence — no fares on those dates, no climate record,
+     a search that failed — and an absence should not be drawn as an object. Set
+     against a rule in the margin it reads as an aside on the page it interrupts,
+     where the panel it replaced read as a result in its own right. */
+  .aside-note {
+    border-left: 1px solid var(--line);
+    padding-left: 0.875rem;
+    font-size: 0.8125rem;
+    line-height: 1.65;
+    color: var(--ink-muted);
+    text-wrap: pretty;
+  }
+
+  /* Waiting, as a route rather than as three bouncing dots.
+     The dots are the single most recognisable gesture in a chat interface and
+     they were doing real work — so this had to say the same thing without saying
+     it that way. A mark crossing a hairline is the same promise (something is on
+     its way, it has not stalled) in the one metaphor this product owns. */
+  .route-track {
+    position: relative;
+    height: 1px;
+    width: 100%;
+    background: var(--line);
+  }
+
+  .route-mark {
+    position: absolute;
+    top: -2px;
+    left: 0;
+    height: 5px;
+    width: 5px;
+    border-radius: 9999px;
+    background: var(--ink);
+    animation: route-travel 2.8s var(--ease-wayfare) infinite;
+  }
+
+  /* ------------------------------------------------------------------------
+     Glass
+     ------------------------------------------------------------------------ */
+
+  /* Fill, rim and depth, with no backdrop-filter. Cards and chips stop here:
+     backdrop-filter is the expensive part, and an itinerary can put a dozen
+     cards on screen at once, which is what stutters on mobile Safari. */
+  .glass {
+    position: relative;
+    background: var(--glass-fill);
+    border-radius: var(--radius-glass);
+    box-shadow:
+      var(--glass-shadow),
+      inset 1px 1px 0 0 var(--glass-rim),
+      inset 0 0 0 1px var(--glass-edge);
+  }
+
+  /* Opted into by the few large surfaces where the refraction actually reads:
+     panels and chat bubbles. */
+  @supports (backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px)) {
+    .glass-blur {
+      -webkit-backdrop-filter: blur(var(--glass-blur)) saturate(150%);
+      backdrop-filter: blur(var(--glass-blur)) saturate(150%);
+    }
+  }
+
+  /* Without backdrop-filter there is nothing to see through, so go opaque. */
+  @supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
+    .glass-blur,
+    .glass-strong {
+      background: var(--glass-fill-opaque);
+    }
+  }
+
+  .glass-strong {
+    background: var(--glass-fill-strong);
+  }
+
+  /* Gloss on the top edge, measured in absolute lengths rather than
+     percentages: a percentage-based diagonal covers a short, wide element like
+     the composer almost entirely and washes the text out. */
+  .glass-sheen::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    background:
+      linear-gradient(
+        to bottom,
+        var(--glass-sheen-top) 0,
+        color-mix(in srgb, var(--glass-sheen-top) 35%, transparent) 0.75rem,
+        transparent 2.5rem
+      ),
+      linear-gradient(to top, var(--glass-sheen-bottom) 0, transparent 3rem);
+    pointer-events: none;
+  }
+
+  /* The traveller's own messages. */
+  .glass-user {
+    background: var(--glass-user);
+  }
+
+  /* Hover lift. A `bg-white/…` utility would replace the fill outright, so the
+     transition stays on this class where the fill is defined. */
+  .glass-hover {
+    transition: background-color 300ms var(--ease-wayfare);
+  }
+
+  .glass-hover:hover,
+  .glass-hover:focus-within {
+    background: var(--glass-hover);
+  }
+
+  /* ------------------------------------------------------------------------
+     Closing section: liquid glass
+     ---------------------------------------------------------------------------
+     The only place in the app that spends real GPU on a surface. It is one
+     screen, it is the last one, and nothing on it has to stay legible while it
+     scrolls — so the expensive material is affordable exactly here and nowhere
+     else.
+     ------------------------------------------------------------------------ */
+
+  /* Light for the glass to bend. Refraction of a flat black backdrop is flat
+     black; without this the button is a grey disc and the tiles are outlines.
+     Deliberately static. It used to drift on a twenty-second loop, which meant
+     the backdrop of every glass surface above it changed on every frame of that
+     loop forever — and a `backdrop-filter` whose backdrop has changed has to
+     re-snapshot and re-filter. Twenty-one of those, permanently, to animate
+     something nobody was ever going to notice moving. */
+  .ready-ambient {
+    position: absolute;
+    inset: -12%;
+    pointer-events: none;
+    background:
+      radial-gradient(38% 42% at 24% 30%, rgb(80 130 255 / 0.22), transparent 70%),
+      radial-gradient(42% 46% at 78% 68%, rgb(245 170 70 / 0.16), transparent 72%),
+      radial-gradient(34% 40% at 62% 20%, rgb(150 90 255 / 0.16), transparent 70%);
+    filter: blur(22px);
+  }
+
+  /* The field the tiles are pinned to, in percentages. Growing it on hover is
+     therefore the whole spreading effect: every tile is placed as a fraction of
+     this box, so a taller box pushes them apart without touching any of them. */
+  .ready-field {
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    translate: -50% -50%;
+    z-index: 1;
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+    transition:
+      width 600ms var(--ease-liquid),
+      height 600ms var(--ease-liquid);
+  }
+
+  .ready-field[data-spread] {
+    width: 110%;
+    height: 150%;
+  }
+
+  .ready-tile {
+    position: relative;
+    display: flex;
+    /* Sized against the viewport rather than stepped at a breakpoint. The gap
+       between tiles is a percentage of the field, so a fixed width piles them
+       into a solid band on a narrow screen and strands them apart on a wide
+       one; scaling with vw holds the overlap steady across both. */
+    height: clamp(72px, 13vw, 190px);
+    width: clamp(72px, 13vw, 190px);
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+    border-radius: clamp(14px, 1.5vw, 22px);
+    border-width: 1px;
+    padding: clamp(0.7rem, 1.4vw, 2rem);
+    box-shadow:
+      0 20px 44px -24px rgb(0 0 0 / 0.72),
+      0 5px 14px -7px rgb(0 0 0 / 0.5),
+      inset 0 1px 0 rgb(255 255 255 / 0.38),
+      inset 0 0 0 1px rgb(255 255 255 / 0.06),
+      inset 0 -20px 34px -24px rgb(0 0 0 / 0.6);
+  }
+
+  /* Gloss down the top-left corner, and a rim light along the top edge. Between
+     them they place a light source, which is what stops the tile reading as a
+     translucent rectangle and starts it reading as a slab of something. */
+  .ready-tile::before,
+  .ready-tile::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    z-index: 1;
+    pointer-events: none;
+    border-radius: inherit;
+  }
+
+  .ready-tile::before {
+    background: linear-gradient(
+      135deg,
+      rgb(255 255 255 / 0.5) 0%,
+      rgb(255 255 255 / 0.1) 20%,
+      transparent 46%
+    );
+    opacity: 0.7;
+  }
+
+  .ready-tile::after {
+    background: radial-gradient(120% 80% at 30% 0%, rgb(255 255 255 / 0.22), transparent 55%);
+  }
+
+  /* Glass from the first frame, in flight and at rest alike. Holding the blur
+     back until the run had landed spared the compositor the worst of the
+     entrance, but it also meant the tiles arrived as flat tinted rectangles
+     and turned to glass a beat later, in full view — a correction where there
+     should have been a material. The stutter it was avoiding is a phone
+     problem, and the phone drops the filter outright further down. */
+  .ready-tile__glass {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    transform: translateZ(0);
+    backface-visibility: hidden;
+    -webkit-backdrop-filter: blur(10px) saturate(180%) brightness(1.06);
+    backdrop-filter: blur(10px) saturate(180%) brightness(1.06);
+  }
+
+  /* The button. A sphere rather than a pill because it is the only thing left
+     on the page, and a shape with no reading direction is the right one for a
+     word that is really just a yes. */
+  .ready-orb {
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    translate: -50% -50%;
+    isolation: isolate;
+    aspect-ratio: 1 / 1;
+    border-radius: 50%;
+    padding: 1.15em;
+    color: #fff;
+    font-size: clamp(2rem, 4.2vw, 3rem);
+    font-weight: 700;
+    line-height: 1;
+    letter-spacing: -0.035em;
+    white-space: nowrap;
+    background: radial-gradient(
+      125% 125% at 32% 22%,
+      rgb(255 255 255 / 0.28) 0%,
+      rgb(255 255 255 / 0.09) 44%,
+      rgb(255 255 255 / 0.03) 100%
+    );
+    /* Brighter than the refracting version below, because a plain blur does not
+       scatter the light the displacement was picking up out of the ambient
+       field, and the sphere goes grey without it. */
+    -webkit-backdrop-filter: blur(22px) saturate(200%) brightness(1.08);
+    backdrop-filter: blur(22px) saturate(200%) brightness(1.08);
+    box-shadow:
+      0 44px 90px -34px rgb(0 0 0 / 0.85),
+      0 12px 34px -14px rgb(0 0 0 / 0.6),
+      inset 0 2px 1px rgb(255 255 255 / 0.65),
+      inset 0 0 0 1px rgb(255 255 255 / 0.14),
+      inset 2px 0 10px -6px rgb(90 150 255 / 0.5),
+      inset -2px 0 10px -6px rgb(255 90 130 / 0.45),
+      inset 0 -34px 60px -32px rgb(0 0 0 / 0.55);
+    transition: background 500ms ease;
+  }
+
+  .ready-orb:hover {
+    background: radial-gradient(
+      125% 125% at 32% 22%,
+      rgb(255 255 255 / 0.38) 0%,
+      rgb(255 255 255 / 0.12) 44%,
+      rgb(255 255 255 / 0.05) 100%
+    );
+  }
+
+  /* A highlight that drifts, so the surface looks like it is still settling. */
+  .ready-orb::before {
+    content: '';
+    position: absolute;
+    z-index: -1;
+    inset: 3%;
+    border-radius: 50%;
+    pointer-events: none;
+    background: radial-gradient(58% 44% at 30% 16%, rgb(255 255 255 / 0.6), transparent 60%);
+    animation: ready-sheen 9s ease-in-out infinite alternate;
+  }
+
+  /* Shadow pooling at the base, which is the whole of the illusion of volume. */
+  .ready-orb::after {
+    content: '';
+    position: absolute;
+    z-index: -1;
+    inset: 0;
+    border-radius: 50%;
+    pointer-events: none;
+    box-shadow: inset 0 -26px 44px -26px rgb(0 0 0 / 0.6);
+  }
+
+  /* The refraction, and only on the button.
+     The tiles had it too, which meant twenty fractal-noise displacement chains
+     filtering a backdrop that is mostly other tiles. At the size a tile renders
+     the displacement is a texture you have to go looking for; on a sphere three
+     times as wide it is the whole effect. So it lives where it reads.
+
+     Kept in its own block for two reasons. WebKit and Gecko reject an SVG
+     reference inside `backdrop-filter` at parse time, which is how they are
+     told to keep the plain blur declared above it — and more immediately, it is
+     the only way that fallback survives the build. Written as consecutive
+     declarations in one rule, the minifier reads the plain blur as dead weight
+     and deletes it. */
+  @supports (backdrop-filter: url('#liquidGlass')) {
+    .ready-orb {
+      backdrop-filter: url(#liquidGlass) blur(13px) saturate(190%) brightness(1.05);
+    }
+  }
+
+  /* Phones: twenty moving tiles each recomputing a live backdrop blur is the
+     one thing that will drop this section's frame rate. Take the blur off and
+     paint the glass instead — the tiles are 72px there, and nobody can see
+     through something that small anyway. */
+  @media (max-width: 767px) {
+    /* One class deep, same as the rule it is overriding, so it wins on being
+       the later of the two. */
+    .ready-tile__glass {
+      -webkit-backdrop-filter: none;
+      backdrop-filter: none;
+      background:
+        linear-gradient(
+          158deg,
+          rgb(255 255 255 / 0.34) 0%,
+          rgb(255 255 255 / 0.1) 34%,
+          rgb(255 255 255 / 0) 56%
+        ),
+        radial-gradient(130% 90% at 28% -6%, rgb(255 255 255 / 0.28), transparent 52%),
+        rgb(255 255 255 / 0.05);
+    }
+  }
+
+  /* ------------------------------------------------------------------------
+     Panels
+     ---------------------------------------------------------------------------
+     The landing page is three screens, not one long one. Each is exactly one
+     viewport tall and the track between them is moved by GSAP rather than by
+     the scrollbar, so a flick of the wheel commits to the next screen instead
+     of leaving the reader parked between two.
+
+     Everything here is gated on `data-panels`, which the scroller sets on the
+     document once it has decided to take over. Without it — no JavaScript,
+     reduced motion, a window too short to hold a panel — the same markup is an
+     ordinary stacked page that scrolls natively.
+     ------------------------------------------------------------------------ */
+
+  html[data-panels],
+  html[data-panels] body {
+    overflow: hidden;
+    overscroll-behavior: none;
+  }
+
+  .panels {
+    position: relative;
+  }
+
+  /* Taken out of the flow entirely, so nothing — a focus ring, an anchor jump,
+     a mobile rubber band — can scroll the document out from under the track. */
+  html[data-panels] .panels {
+    position: fixed;
+    inset: 0;
+    overflow: hidden;
+  }
+
+  html[data-panels] .panels__track {
+    will-change: transform;
+  }
+
+  .panel {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    min-height: var(--panel-h);
+    overflow: hidden;
+  }
+
+  html[data-panels] .panel {
+    height: var(--panel-h);
+    min-height: 0;
+  }
+
+  /* The column the panel's content lives in: it takes the height left over
+     after the padding, so a child marked `flex-1` absorbs whatever a short
+     window did not have room for rather than pushing the rail off the bottom. */
+  .panel__body {
+    position: relative;
+    z-index: 10;
+    display: flex;
+    flex: 1 1 auto;
+    min-height: 0;
+    flex-direction: column;
+  }
+
+  /* ------------------------------------------------------------------------
+     Seams
+     ---------------------------------------------------------------------------
+     The curved join between two panels, done as a collapsing strip rather than
+     a static divider. On arrival the strip is the height of a hand and filled
+     with the panel you just left; the dome inside it is the panel you are
+     arriving on. Animating the strip to nothing pulls the dome up through it,
+     so a snap reads as one surface swelling over another instead of a cut.
+
+     Height is zero at rest, which is also how they stay invisible on the
+     natively-scrolling fallback.
+     ------------------------------------------------------------------------ */
+
+  .seam {
+    position: absolute;
+    left: 0;
+    z-index: 60;
+    width: 100%;
+    height: 0;
+    overflow: hidden;
+    pointer-events: none;
+  }
+
+  .seam--top {
+    top: 0;
+  }
+
+  .seam--bottom {
+    bottom: 0;
+  }
+
+  /* Far taller and wider than the strip, so only the shallow crown of the
+     ellipse is ever on screen. A border radius rather than a clip path, because
+     this one has to survive being seven times the height of its own container
+     and still read as a shallow curve across the full width. */
+  .seam__dome {
+    position: absolute;
+    left: 50%;
+    width: 150%;
+    height: 775%;
+    translate: -50% 0;
+    border-radius: 50%;
+  }
+
+  .seam--top .seam__dome {
+    top: 0;
+  }
+
+  .seam--bottom .seam__dome {
+    bottom: 0;
+  }
+
+  /* ------------------------------------------------------------------------
+     Scroll cue
+     ------------------------------------------------------------------------ */
+
+  /* The closing button's material at a twentieth of its size, and the page's
+     one other piece of glass. Built out of the ink token rather than white, so
+     the same disc reads as a light on night and a shadow on paper without
+     being told which one it is standing on.
+
+     A plain blur, not the refraction: the SVG filters it would reference are
+     mounted with the closing panel and do not exist up here, and at 44px the
+     displacement is invisible anyway. */
+  .cue-orb {
+    display: grid;
+    place-items: center;
+    isolation: isolate;
+    height: 2.75rem;
+    width: 2.75rem;
+    border-radius: 50%;
+    color: var(--ink-soft);
+    background: radial-gradient(
+      125% 125% at 32% 22%,
+      color-mix(in oklab, var(--ink) 15%, transparent) 0%,
+      color-mix(in oklab, var(--ink) 6%, transparent) 46%,
+      transparent 100%
+    );
+    -webkit-backdrop-filter: blur(14px) saturate(180%) brightness(1.06);
+    backdrop-filter: blur(14px) saturate(180%) brightness(1.06);
+    box-shadow:
+      0 14px 30px -14px rgb(0 0 0 / 0.55),
+      inset 0 1px 0 color-mix(in oklab, var(--ink) 30%, transparent),
+      inset 0 0 0 1px color-mix(in oklab, var(--ink) 12%, transparent);
+    /* Transform is the drift's, and only the drift's. Anything else that wants
+       to move this has to do it in a property the animation is not holding. */
+    animation: cue-drift 3.4s var(--ease-wayfare) infinite;
+    transition:
+      color 300ms var(--ease-wayfare),
+      background 300ms var(--ease-wayfare);
+  }
+
+  .cue-orb:hover {
+    color: var(--ink);
+    background: radial-gradient(
+      125% 125% at 32% 22%,
+      color-mix(in oklab, var(--ink) 24%, transparent) 0%,
+      color-mix(in oklab, var(--ink) 10%, transparent) 46%,
+      transparent 100%
+    );
+  }
+
+  /* ------------------------------------------------------------------------
+     Destination rail
+     ---------------------------------------------------------------------------
+     A run of cities that drifts on its own and can be pushed. Two identical
+     copies, wrapped by the ticker, which is what makes the loop seamless in
+     both directions without a visible reset.
+     ------------------------------------------------------------------------ */
+
+  .rail {
+    --rail-h: clamp(88px, calc(6vw + 8vh), 172px);
+    overflow: hidden;
+    -webkit-mask-image: linear-gradient(90deg, transparent 0, #000 4%, #000 96%, transparent 100%);
+    mask-image: linear-gradient(90deg, transparent 0, #000 4%, #000 96%, transparent 100%);
+  }
+
+  .rail__track {
+    display: flex;
+    width: max-content;
+    gap: 0.75rem;
+    will-change: transform;
+  }
+
+  .rail__plate {
+    position: relative;
+    height: var(--rail-h);
+    aspect-ratio: 4 / 5;
+    flex: none;
+    overflow: hidden;
+    border-radius: 0.875rem;
+    background: color-mix(in oklab, var(--ink) 8%, transparent);
+  }
+
+  /* ------------------------------------------------------------------------
+     Ambient + loading
+     ------------------------------------------------------------------------ */
+
+  /* Blobs are translated rather than resized so the animation stays on the
+     compositor instead of triggering layout. */
+  .backdrop-blob {
+    position: absolute;
+    border-radius: 9999px;
+    filter: blur(90px);
+    will-change: transform;
+  }
+
+  .animate-drift-a {
+    animation: drift-a 34s ease-in-out infinite;
+  }
+  .animate-drift-b {
+    animation: drift-b 42s ease-in-out infinite;
+  }
+  .animate-drift-c {
+    animation: drift-c 38s ease-in-out infinite;
+  }
+
+  /* Skeletons: a glass shimmer rather than a spinner. */
+  .shimmer {
+    position: relative;
+    overflow: hidden;
+    background: color-mix(in oklab, var(--ink) 7%, transparent);
+  }
+
+  .shimmer::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(
+      90deg,
+      transparent 0%,
+      color-mix(in oklab, var(--ink) 5%, transparent) 50%,
+      transparent 100%
+    );
+    animation: glass-shimmer 1.6s ease-in-out infinite;
+  }
+
+  .animate-orb-pulse {
+    animation: orb-pulse 5.5s ease-in-out infinite;
+  }
+
+  .animate-orb-halo {
+    animation: orb-halo 5.5s ease-in-out infinite;
+  }
+
+  .scroll-subtle {
+    scrollbar-width: thin;
+    scrollbar-color: color-mix(in oklab, var(--ink) 22%, transparent) transparent;
+  }
+
+  .scroll-subtle::-webkit-scrollbar {
+    width: 8px;
+  }
+
+  .scroll-subtle::-webkit-scrollbar-thumb {
+    background: color-mix(in oklab, var(--ink) 22%, transparent);
+    border-radius: 9999px;
+  }
+
+  .scroll-subtle::-webkit-scrollbar-track {
+    background: transparent;
+  }
+
+  /* ------------------------------------------------------------------------
+     Agent markdown
+     ------------------------------------------------------------------------ */
+
+  .agent-prose > :first-child {
+    margin-top: 0;
+  }
+
+  .agent-prose > :last-child {
+    margin-bottom: 0;
+  }
+
+  .agent-prose h1,
+  .agent-prose h2,
+  .agent-prose h3 {
+    color: var(--ink);
+    font-weight: 600;
+    letter-spacing: -0.02em;
+    line-height: 1.28;
+    margin: 1.25em 0 0.5em;
+  }
+
+  .agent-prose h1 {
+    font-size: 1.15rem;
+  }
+
+  .agent-prose h2 {
+    font-size: 1.05rem;
+  }
+
+  .agent-prose h3 {
+    font-size: 0.975rem;
+  }
+
+  .agent-prose p {
+    margin: 0.65em 0;
+  }
+
+  .agent-prose ul,
+  .agent-prose ol {
+    margin: 0.65em 0;
+    padding-left: 1.25rem;
+  }
+
+  .agent-prose ul {
+    list-style: disc;
+  }
+
+  .agent-prose ol {
+    list-style: decimal;
+  }
+
+  .agent-prose li {
+    margin: 0.3em 0;
+  }
+
+  .agent-prose li::marker {
+    color: var(--ink-muted);
+  }
+
+  .agent-prose strong {
+    color: var(--ink);
+    font-weight: 600;
+  }
+
+  .agent-prose a {
+    color: var(--ink);
+    text-decoration: underline;
+    text-decoration-color: color-mix(in oklab, var(--ink) 35%, transparent);
+    text-underline-offset: 3px;
+  }
+
+  .agent-prose code {
+    background: color-mix(in oklab, var(--ink) 7%, transparent);
+    border-radius: 0.25rem;
+    font-family: var(--font-dm-mono), ui-monospace, monospace;
+    font-size: 0.85em;
+    padding: 0.1em 0.35em;
+  }
+
+  .agent-prose pre {
+    background: color-mix(in oklab, var(--ink) 6%, transparent);
+    border-radius: 0.5rem;
+    margin: 0.75em 0;
+    overflow-x: auto;
+    padding: 0.75rem 1rem;
+  }
+
+  .agent-prose pre code {
+    background: transparent;
+    padding: 0;
+  }
+
+  .agent-prose blockquote {
+    border-left: 2px solid var(--line);
+    color: var(--ink-soft);
+    margin: 0.75em 0;
+    padding-left: 0.85rem;
+  }
+
+  .agent-prose hr {
+    border-color: var(--line);
+    margin: 1.25em 0;
+  }
+
+  .agent-prose table {
+    border-collapse: collapse;
+    display: block;
+    font-size: 0.875rem;
+    margin: 0.85em 0;
+    overflow-x: auto;
+    width: 100%;
+  }
+
+  .agent-prose th,
+  .agent-prose td {
+    border: 1px solid var(--line);
+    padding: 0.4rem 0.65rem;
+    text-align: left;
+    vertical-align: top;
+  }
+
+  .agent-prose th {
+    background: color-mix(in oklab, var(--ink) 5%, transparent);
+    font-weight: 600;
+  }
+
+  /* The agent's question, set at display size.
+     Declared after `.agent-prose` on purpose: it is the same markdown renderer
+     and it overrides the paragraph rhythm that copy at a sixth of this size
+     wants. A question is still markdown because the model writes it — it emphasises
+     a word now and then — and rendering it as plain text would print the
+     asterisks. */
+  .ask-prose {
+    color: var(--ink);
+    text-wrap: pretty;
+  }
+
+  .ask-prose p {
+    /* Proportional to the size, so the two sentences of a question sit closer
+       together than two paragraphs of body copy would. */
+    margin: 0.45em 0;
+  }
+
+  /* The base weight is already 600, so emphasis has to go further to register. */
+  .ask-prose strong {
+    font-weight: 700;
+  }
+}
+
+/* ===========================================================================
+   Keyframes
+   =========================================================================== */
+
+@keyframes drift-a {
+  0%,
+  100% {
+    transform: translate3d(0, 0, 0) scale(1);
+  }
+  50% {
+    transform: translate3d(6vw, -4vh, 0) scale(1.12);
+  }
+}
+
+@keyframes drift-b {
+  0%,
+  100% {
+    transform: translate3d(0, 0, 0) scale(1.05);
+  }
+  50% {
+    transform: translate3d(-7vw, 5vh, 0) scale(0.95);
+  }
+}
+
+@keyframes drift-c {
+  0%,
+  100% {
+    transform: translate3d(0, 0, 0) scale(0.98);
+  }
+  50% {
+    transform: translate3d(4vw, 6vh, 0) scale(1.1);
+  }
+}
+
+@keyframes ready-sheen {
+  from {
+    transform: translate(-4%, -2%);
+    opacity: 0.7;
+  }
+  to {
+    transform: translate(5%, 3%);
+    opacity: 0.95;
+  }
+}
+
+/* Three pixels, held longer at the bottom of the fall than at the top of it.
+   Enough to catch an eye at the edge of vision and not enough to look like it
+   is asking for anything. */
+@keyframes cue-drift {
+  0%,
+  100% {
+    transform: translateY(-3px);
+  }
+  50% {
+    transform: translateY(3px);
+  }
+}
+
+@keyframes glass-shimmer {
+  0% {
+    transform: translateX(-100%);
+  }
+  100% {
+    transform: translateX(100%);
+  }
+}
+
+/* A mark crossing the route and fading out at both ends, so the track does not
+   read as a progress bar that keeps restarting from empty. Reduced motion leaves
+   it parked at the start of the line, which is a static mark rather than nothing:
+   the label beside it is what actually carries the message. */
+@keyframes route-travel {
+  0% {
+    left: 0;
+    opacity: 0;
+  }
+  14% {
+    opacity: 1;
+  }
+  86% {
+    opacity: 1;
+  }
+  100% {
+    left: 100%;
+    opacity: 0;
+  }
+}
+
+@keyframes orb-pulse {
+  0%,
+  100% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.05);
+  }
+}
+
+@keyframes orb-halo {
+  0%,
+  100% {
+    transform: scale(1);
+    opacity: 0.45;
+  }
+  50% {
+    transform: scale(1.28);
+    opacity: 0.16;
+  }
+}
+
+/* Unlayered and last on purpose: this must beat every layer and utility. */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+  }
+
+  .backdrop-blob {
+    animation: none !important;
+  }
+
+  html {
+    scroll-behavior: auto !important;
+  }
+}
