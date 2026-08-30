@@ -1,0 +1,30 @@
+{
+  "$schema": "https://unpkg.com/knip@5/schema.json",
+
+  // Teaches knip where a Next.js app's entry points are: pages, layouts, route
+  // handlers and the config files are all reached by the framework rather than by
+  // an import, so without this every one of them looks unreachable.
+  "next": true,
+
+  /**
+   * An export used by the next line in its own file is not dead code.
+   *
+   * `MS_PER_DAY` is built from `MS_PER_HOUR`, `SECONDS_PER_HOUR` from
+   * `SECONDS_PER_MINUTE`, and a prop type is named right above the component that
+   * takes it. Reported literally, those are the majority of findings and all of
+   * them are noise — and a check that reports mostly noise is a check nobody
+   * reads. What is left is the real question: an export nothing anywhere
+   * references.
+   */
+  "ignoreExportsUsedInFile": true,
+
+  "ignoreDependencies": [
+    // Reached as a string through FlatCompat — `compat.extends('next/...')` in
+    // eslint.config.mjs — which knip cannot follow.
+    "eslint-config-next",
+
+    // postcss.config.mjs names `@tailwindcss/postcss` as a plugin and never
+    // imports postcss itself; Next brings the runtime.
+    "postcss",
+  ],
+}
