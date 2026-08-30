@@ -1,5 +1,7 @@
 import 'server-only';
 
+import { type BackoffLimits, exponentialBackoff } from '@/lib/http-retry';
+import { createStartStagger } from '@/lib/request-pacing';
 import { sleep } from '@/lib/sleep';
 
 import {
@@ -10,12 +12,10 @@ import {
   MIN_REQUEST_GAP_MS,
   type SerpApiEngineName,
 } from './constants';
-import {
-  MissingSerpApiKeyError,
-  SerpApiAuthError,
-  SerpApiQuotaError,
-  TransientSerpApiError,
-} from './errors';
+import { MissingSerpApiKeyError } from './errors/missing-serp-api-key-error';
+import { SerpApiAuthError } from './errors/serp-api-auth-error';
+import { SerpApiQuotaError } from './errors/serp-api-quota-error';
+import { TransientSerpApiError } from './errors/transient-serp-api-error';
 import { Outcome, vendorFor, type VendorSpec } from './vendors';
 
 /**
@@ -40,20 +40,12 @@ function apiKey(vendor: VendorSpec): string {
 }
 
 /**
- * Spaces out the start of outbound calls, process-wide. Starts only — calls still
- * overlap, because neither vendor holds a per-IP slot the way Open-Meteo does.
+ * Starts only — calls still overlap, because neither vendor holds a per-IP slot
+ * the way Open-Meteo does.
  */
-let requestChain: Promise<void> = Promise.resolve();
+const takeTurn = createStartStagger(MIN_REQUEST_GAP_MS);
 
-function takeTurn(): Promise<void> {
-  const turn = requestChain.then(() => sleep(MIN_REQUEST_GAP_MS));
-  requestChain = turn.catch(() => {});
-  return turn;
-}
-
-function exponentialBackoff(attempt: number): number {
-  return Math.min(API_BACKOFF_BASE_MS * 2 ** attempt, API_BACKOFF_MAX_MS);
-}
+const BACKOFF: BackoffLimits = { baseMs: API_BACKOFF_BASE_MS, maxMs: API_BACKOFF_MAX_MS };
 
 /**
  * Calls one engine and returns raw JSON, unvalidated — callers own their schema,
@@ -93,7 +85,7 @@ export async function serpApiSearch(
       if (attempt >= API_RETRIES) {
         throw new TransientSerpApiError(`${vendor.label} ${engine} unreachable: ${String(cause)}`);
       }
-      await sleep(exponentialBackoff(attempt));
+      await sleep(exponentialBackoff(attempt, BACKOFF));
       continue;
     }
 
@@ -125,7 +117,7 @@ export async function serpApiSearch(
         if (attempt >= API_RETRIES) {
           throw new TransientSerpApiError(describe(vendor, engine, response.status, stated));
         }
-        await sleep(exponentialBackoff(attempt));
+        await sleep(exponentialBackoff(attempt, BACKOFF));
         continue;
       }
 

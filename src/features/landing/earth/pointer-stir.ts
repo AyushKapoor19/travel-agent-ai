@@ -13,13 +13,13 @@ import { BOOST_FLOOR, BOOST_HALF_LIFE, BOOST_PER_SWEEP, HAZE, MAX_BOOST } from '
  */
 export class PointerStir {
   /** Extra radians per second, signed. Zero when nothing is being stirred. */
-  private boost = 0;
+  private _boost = 0;
 
   /** Where the cursor last was and when, in page pixels. Null between gestures. */
-  private trace: { x: number; time: number } | null = null;
+  private _trace: { x: number; time: number } | null = null;
 
-  get value(): number {
-    return this.boost;
+  get boost(): number {
+    return this._boost;
   }
 
   /**
@@ -43,12 +43,12 @@ export class PointerStir {
     if (x * x + y * y > reach * reach) {
       // Re-entering somewhere else is a new gesture, not a jump across the gap
       // at whatever speed that crossing would imply.
-      this.trace = null;
+      this._trace = null;
       return;
     }
 
-    const previous = this.trace;
-    this.trace = { x: event.clientX, time: event.timeStamp };
+    const previous = this._trace;
+    this._trace = { x: event.clientX, time: event.timeStamp };
     if (!previous) return;
 
     const seconds = (event.timeStamp - previous.time) / 1000;
@@ -65,7 +65,7 @@ export class PointerStir {
     // outright: a reader reversing their hand is asking the planet to reverse,
     // and making them out-muscle their own last gesture would read as the planet
     // ignoring them.
-    if (push * this.boost <= 0 || Math.abs(push) > Math.abs(this.boost)) this.boost = push;
+    if (push * this._boost <= 0 || Math.abs(push) > Math.abs(this._boost)) this._boost = push;
   }
 
   /**
@@ -76,10 +76,10 @@ export class PointerStir {
    * the sign, so this is the same decay in both directions.
    */
   decay(elapsedSeconds: number): void {
-    if (this.boost === 0) return;
+    if (this._boost === 0) return;
 
-    this.boost *= Math.pow(0.5, elapsedSeconds / BOOST_HALF_LIFE);
-    if (Math.abs(this.boost) < BOOST_FLOOR) this.boost = 0;
+    this._boost *= Math.pow(0.5, elapsedSeconds / BOOST_HALF_LIFE);
+    if (Math.abs(this._boost) < BOOST_FLOOR) this._boost = 0;
   }
 
   /**
@@ -89,7 +89,7 @@ export class PointerStir {
    * state the reader never asked for and cannot account for.
    */
   reset(): void {
-    this.boost = 0;
-    this.trace = null;
+    this._boost = 0;
+    this._trace = null;
   }
 }

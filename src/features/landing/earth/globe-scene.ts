@@ -51,74 +51,74 @@ import {
  * frame by frame.
  */
 export class GlobeScene {
-  private readonly renderer: WebGLRenderer;
-  private readonly scene = new Scene();
-  private readonly camera: OrthographicCamera;
+  private readonly _renderer: WebGLRenderer;
+  private readonly _scene = new Scene();
+  private readonly _camera: OrthographicCamera;
 
   /** Carries the tilt. The atmosphere shells hang off this, unrotated by the spin. */
-  private readonly pivot = new Group();
+  private readonly _pivot = new Group();
   /** Turns. Holds the surface and the clouds. */
-  private readonly spin = new Group();
+  private readonly _spin = new Group();
 
-  private readonly geometry: SphereGeometry;
-  private readonly surface: Mesh;
-  private readonly clouds: Mesh;
-  private readonly haze: Mesh;
-  private readonly bloom: Mesh;
+  private readonly _geometry: SphereGeometry;
+  private readonly _surface: Mesh;
+  private readonly _clouds: Mesh;
+  private readonly _haze: Mesh;
+  private readonly _bloom: Mesh;
 
-  private readonly textures: Texture[] = [];
+  private readonly _textures: Texture[] = [];
 
   /** The planet's rendered diameter in CSS pixels. Also the stirring ruler. */
-  private renderedDiameter = 0;
+  private _renderedDiameter = 0;
 
   /**
    * @throws When the canvas cannot give a WebGL context. Use `create` instead of
    * calling this directly.
    */
-  private constructor(private readonly canvas: HTMLCanvasElement) {
-    this.renderer = new WebGLRenderer({ canvas, alpha: true, antialias: true });
-    this.renderer.setClearAlpha(0);
-    this.renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, MAX_PIXEL_RATIO));
+  private constructor(private readonly _canvas: HTMLCanvasElement) {
+    this._renderer = new WebGLRenderer({ canvas: _canvas, alpha: true, antialias: true });
+    this._renderer.setClearAlpha(0);
+    this._renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, MAX_PIXEL_RATIO));
 
     /**
      * Orthographic, because that is how a planet photographed from a long way
      * off actually projects: a true circle, with no perspective flare.
      */
-    this.camera = new OrthographicCamera(-1, 1, 1, -1, 1, CAMERA_FAR);
-    this.camera.position.z = CAMERA_DISTANCE;
+    this._camera = new OrthographicCamera(-1, 1, 1, -1, 1, CAMERA_FAR);
+    this._camera.position.z = CAMERA_DISTANCE;
 
-    this.pivot.rotation.z = MathUtils.degToRad(TILT_Z_DEG);
-    this.pivot.rotation.x = MathUtils.degToRad(TILT_X_DEG);
-    this.scene.add(this.pivot);
-    this.pivot.add(this.spin);
+    this._pivot.rotation.z = MathUtils.degToRad(TILT_Z_DEG);
+    this._pivot.rotation.x = MathUtils.degToRad(TILT_X_DEG);
+    this._scene.add(this._pivot);
+    this._pivot.add(this._spin);
 
     const light = new DirectionalLight(Light.SUN_COLOR, Light.SUN_INTENSITY);
     light.position
       .set(...SUN_DIRECTION)
       .normalize()
       .multiplyScalar(LIGHT_DISTANCE);
-    this.scene.add(light);
-    this.scene.add(new AmbientLight(Light.AMBIENT_COLOR, Light.AMBIENT_INTENSITY));
+    this._scene.add(light);
+    this._scene.add(new AmbientLight(Light.AMBIENT_COLOR, Light.AMBIENT_INTENSITY));
 
-    this.geometry = new SphereGeometry(1, SPHERE_SEGMENTS, SPHERE_SEGMENTS);
+    this._geometry = new SphereGeometry(1, SPHERE_SEGMENTS, SPHERE_SEGMENTS);
 
-    this.surface = new Mesh(this.geometry, new MeshPhongMaterial({ color: Surface.BASE_COLOR }));
-    this.spin.add(this.surface);
+    this._surface = new Mesh(this._geometry, new MeshPhongMaterial({ color: Surface.BASE_COLOR }));
+    this._spin.add(this._surface);
 
-    this.clouds = new Mesh(
-      this.geometry,
+    this._clouds = new Mesh(
+      this._geometry,
       new MeshPhongMaterial({ transparent: true, depthWrite: false, opacity: 0 }),
     );
-    this.clouds.scale.setScalar(Clouds.SCALE);
-    this.spin.add(this.clouds);
+    this._clouds.scale.setScalar(Clouds.SCALE);
+    this._spin.add(this._clouds);
 
-    this.haze = new Mesh(this.geometry, atmosphereMaterial(HAZE));
-    this.haze.scale.setScalar(HAZE.scale);
-    this.pivot.add(this.haze);
+    this._haze = new Mesh(this._geometry, atmosphereMaterial(HAZE));
+    this._haze.scale.setScalar(HAZE.scale);
+    this._pivot.add(this._haze);
 
-    this.bloom = new Mesh(this.geometry, atmosphereMaterial(BLOOM));
-    this.bloom.scale.setScalar(BLOOM.scale);
-    this.pivot.add(this.bloom);
+    this._bloom = new Mesh(this._geometry, atmosphereMaterial(BLOOM));
+    this._bloom.scale.setScalar(BLOOM.scale);
+    this._pivot.add(this._bloom);
   }
 
   /** Null when the browser has no WebGL, in which case the placeholder stays put. */
@@ -131,29 +131,29 @@ export class GlobeScene {
   }
 
   get diameter(): number {
-    return this.renderedDiameter;
+    return this._renderedDiameter;
   }
 
   /** Reads the canvas's client box and re-frames the planet inside it. */
   measure(): void {
-    const width = this.canvas.clientWidth;
-    const height = this.canvas.clientHeight;
+    const width = this._canvas.clientWidth;
+    const height = this._canvas.clientHeight;
     if (width === 0 || height === 0) return;
 
-    this.renderer.setSize(width, height, false);
+    this._renderer.setSize(width, height, false);
 
-    this.camera.left = -width / 2;
-    this.camera.right = width / 2;
-    this.camera.top = height / 2;
-    this.camera.bottom = -height / 2;
-    this.camera.updateProjectionMatrix();
+    this._camera.left = -width / 2;
+    this._camera.right = width / 2;
+    this._camera.top = height / 2;
+    this._camera.bottom = -height / 2;
+    this._camera.updateProjectionMatrix();
 
     // Height drives the disc; width only has to hold the bloom, which fades to
     // nothing at its own edge and so costs almost no clearance.
-    this.renderedDiameter = Math.min(height * DISC_OF_STAGE, width / BLOOM.scale, MAX_DIAMETER_PX);
+    this._renderedDiameter = Math.min(height * DISC_OF_STAGE, width / BLOOM.scale, MAX_DIAMETER_PX);
 
-    this.pivot.scale.setScalar(this.renderedDiameter / 2);
-    this.pivot.position.set(0, 0, 0);
+    this._pivot.scale.setScalar(this._renderedDiameter / 2);
+    this._pivot.position.set(0, 0, 0);
   }
 
   /**
@@ -164,12 +164,13 @@ export class GlobeScene {
    * than sliding the ground out from under the weather.
    */
   advance(elapsedSeconds: number, boost: number): void {
-    this.spin.rotation.y += elapsedSeconds * (SPIN_PER_SECOND + boost);
-    this.clouds.rotation.y += elapsedSeconds * (CLOUD_DRIFT_PER_SECOND + boost * CLOUD_DRIFT_RATIO);
+    this._spin.rotation.y += elapsedSeconds * (SPIN_PER_SECOND + boost);
+    this._clouds.rotation.y +=
+      elapsedSeconds * (CLOUD_DRIFT_PER_SECOND + boost * CLOUD_DRIFT_RATIO);
   }
 
   render(): void {
-    this.renderer.render(this.scene, this.camera);
+    this._renderer.render(this._scene, this._camera);
   }
 
   /**
@@ -180,7 +181,7 @@ export class GlobeScene {
    */
   async loadTextures(): Promise<void> {
     const loader = new TextureLoader();
-    const anisotropy = this.renderer.capabilities.getMaxAnisotropy();
+    const anisotropy = this._renderer.capabilities.getMaxAnisotropy();
 
     /** Anisotropy is what keeps the texture sharp where it rakes away at the limb. */
     const load = (url: string, isColor: boolean) =>
@@ -190,7 +191,7 @@ export class GlobeScene {
           (texture) => {
             texture.anisotropy = anisotropy;
             if (isColor) texture.colorSpace = SRGBColorSpace;
-            this.textures.push(texture);
+            this._textures.push(texture);
             resolve(texture);
           },
           undefined,
@@ -205,7 +206,7 @@ export class GlobeScene {
       load(TEXTURES.clouds, true),
     ]);
 
-    const surface = this.surface.material as MeshPhongMaterial;
+    const surface = this._surface.material as MeshPhongMaterial;
     surface.map = day;
     surface.bumpMap = relief;
     surface.bumpScale = Surface.BUMP_SCALE;
@@ -215,22 +216,22 @@ export class GlobeScene {
     surface.color = new Color(Surface.LIT_COLOR);
     surface.needsUpdate = true;
 
-    const clouds = this.clouds.material as MeshPhongMaterial;
+    const clouds = this._clouds.material as MeshPhongMaterial;
     clouds.map = cloud;
     clouds.opacity = Clouds.OPACITY;
     clouds.needsUpdate = true;
   }
 
   dispose(): void {
-    this.geometry.dispose();
-    this.textures.forEach((texture) => texture.dispose());
+    this._geometry.dispose();
+    this._textures.forEach((texture) => texture.dispose());
 
-    for (const mesh of [this.surface, this.clouds, this.haze, this.bloom]) {
+    for (const mesh of [this._surface, this._clouds, this._haze, this._bloom]) {
       const material = mesh.material;
       if (Array.isArray(material)) material.forEach((entry) => entry.dispose());
       else material.dispose();
     }
 
-    this.renderer.dispose();
+    this._renderer.dispose();
   }
 }

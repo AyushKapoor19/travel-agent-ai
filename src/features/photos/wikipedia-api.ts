@@ -1,6 +1,7 @@
-import { HttpStatus, UPSTREAM_REVALIDATE_SECONDS } from '@/lib/http';
+import { UPSTREAM_REVALIDATE_SECONDS } from '@/lib/http';
+import { backoffForResponse, type BackoffLimits, isRetryableStatus } from '@/lib/http-retry';
+import { createStartStagger } from '@/lib/request-pacing';
 import { sleep } from '@/lib/sleep';
-import { MS_PER_SECOND } from '@/lib/time';
 
 import {
   API_BACKOFF_BASE_MS,
@@ -22,32 +23,13 @@ import { TransientImageError } from './errors';
  */
 
 /**
- * Spaces out the start of every outbound call, process-wide.
- *
- * Callers still run concurrently; only their request starts are staggered,
- * which keeps a dozen lookups well inside the rate limit without serialising
- * the whole batch behind each round trip.
+ * Wikipedia throttles by rate rather than by concurrency, so staggering the
+ * starts is enough — a dozen lookups stay inside the limit without queueing the
+ * whole batch behind each round trip.
  */
-let requestChain: Promise<void> = Promise.resolve();
+const takeTurn = createStartStagger(MIN_REQUEST_GAP_MS);
 
-function takeTurn(): Promise<void> {
-  const turn = requestChain.then(() => sleep(MIN_REQUEST_GAP_MS));
-  requestChain = turn.catch(() => {});
-  return turn;
-}
-
-/** A status that says "later", as opposed to one that says "no". */
-function isRetryable(status: number): boolean {
-  return status === HttpStatus.TOO_MANY_REQUESTS || status >= HttpStatus.INTERNAL_ERROR;
-}
-
-function backoffFor(response: Response, attempt: number): number {
-  const retryAfter = Number(response.headers.get('retry-after'));
-  if (Number.isFinite(retryAfter) && retryAfter > 0) {
-    return Math.min(retryAfter * MS_PER_SECOND, API_BACKOFF_MAX_MS);
-  }
-  return API_BACKOFF_BASE_MS * 2 ** attempt;
-}
+const BACKOFF: BackoffLimits = { baseMs: API_BACKOFF_BASE_MS, maxMs: API_BACKOFF_MAX_MS };
 
 /**
  * Calls the API and returns the raw JSON, unvalidated — callers own their own
@@ -75,12 +57,12 @@ export async function callWikipedia(params: Record<string, string>): Promise<unk
 
     if (response.ok) return response.json();
 
-    const retryable = isRetryable(response.status);
+    const retryable = isRetryableStatus(response.status);
     if (!retryable || attempt >= API_RETRIES) {
       const message = `Wikipedia API ${response.status}`;
       throw retryable ? new TransientImageError(message) : new Error(message);
     }
 
-    await sleep(backoffFor(response, attempt));
+    await sleep(backoffForResponse(response, attempt, BACKOFF));
   }
 }

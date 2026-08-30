@@ -54,7 +54,7 @@ export function EarthGlobe({ onReady, className }: EarthGlobeProps) {
       last = now;
 
       stir.decay(elapsed);
-      scene.advance(elapsed, stir.value);
+      scene.advance(elapsed, stir.boost);
       scene.render();
 
       if (running) handle = requestAnimationFrame(loop);

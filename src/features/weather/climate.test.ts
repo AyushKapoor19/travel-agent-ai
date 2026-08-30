@@ -27,7 +27,8 @@ vi.mock('./open-meteo', () => ({
 }));
 
 const { weatherProvider } = await import('./climate');
-const { TransientWeatherError, UnknownPlaceError } = await import('./errors');
+const { TransientWeatherError } = await import('./errors/transient-weather-error');
+const { UnknownPlaceError } = await import('./errors/unknown-place-error');
 
 function place(name: string): GeocodedPlace {
   return {

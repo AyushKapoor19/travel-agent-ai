@@ -5,7 +5,8 @@ import { monthName } from '@/lib/months';
 
 import { climateKey, readNormals, writeNormals } from './cache';
 import { bestMonthNames, provenanceLabel, rainWord } from './descriptors';
-import { TransientWeatherError, UnknownPlaceError } from './errors';
+import { TransientWeatherError } from './errors/transient-weather-error';
+import { UnknownPlaceError } from './errors/unknown-place-error';
 import { aggregateNormals, normalsWindow } from './normals';
 import { fetchDailySeries, geocodePlace } from './open-meteo';
 import type {

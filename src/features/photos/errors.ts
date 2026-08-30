@@ -7,7 +7,7 @@
  * for the rest of the day.
  */
 export class TransientImageError extends Error {
-  public override readonly name = 'TransientImageError';
+  override readonly name = 'TransientImageError';
 }
 
 export function isTransient(error: unknown): error is TransientImageError {

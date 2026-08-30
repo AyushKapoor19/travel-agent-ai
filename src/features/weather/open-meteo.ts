@@ -2,8 +2,15 @@ import 'server-only';
 
 import { sameCountry } from '@/lib/countries';
 import { HttpStatus, UPSTREAM_REVALIDATE_SECONDS } from '@/lib/http';
+import {
+  backoffForResponse,
+  type BackoffLimits,
+  exponentialBackoff,
+  isRetryableStatus,
+} from '@/lib/http-retry';
+import { createRequestSerializer } from '@/lib/request-pacing';
 import { sleep } from '@/lib/sleep';
-import { MS_PER_HOUR, MS_PER_SECOND } from '@/lib/time';
+import { MS_PER_HOUR } from '@/lib/time';
 
 import {
   API_BACKOFF_BASE_MS,
@@ -16,7 +23,9 @@ import {
   MIN_REQUEST_GAP_MS,
   USER_AGENT,
 } from './constants';
-import { QuotaExhaustedError, TransientWeatherError, UnknownPlaceError } from './errors';
+import { QuotaExhaustedError } from './errors/quota-exhausted-error';
+import { TransientWeatherError } from './errors/transient-weather-error';
+import { UnknownPlaceError } from './errors/unknown-place-error';
 import type { GeocodedPlace } from './types';
 import { archiveResponseSchema, geocodingResponseSchema } from './types';
 
@@ -41,30 +50,9 @@ import { archiveResponseSchema, geocodingResponseSchema } from './types';
  * climates and three 429s, and because a 429 is a soft failure the two survivors
  * looked like a complete answer.
  */
-let tail: Promise<unknown> = Promise.resolve();
+const serialize = createRequestSerializer(MIN_REQUEST_GAP_MS);
 
-function serialize<T>(task: () => Promise<T>): Promise<T> {
-  const run = tail.then(task, task);
-  tail = run.then(() => sleep(MIN_REQUEST_GAP_MS)).catch(() => sleep(MIN_REQUEST_GAP_MS));
-  return run;
-}
-
-function isRetryable(status: number): boolean {
-  return status === HttpStatus.TOO_MANY_REQUESTS || status >= HttpStatus.INTERNAL_ERROR;
-}
-
-function exponentialBackoff(attempt: number): number {
-  return Math.min(API_BACKOFF_BASE_MS * 2 ** attempt, API_BACKOFF_MAX_MS);
-}
-
-/** The server's own answer to "when should I come back", when it gives one. */
-function backoffFor(response: Response, attempt: number): number {
-  const retryAfter = Number(response.headers.get('retry-after'));
-  if (Number.isFinite(retryAfter) && retryAfter > 0) {
-    return Math.min(retryAfter * MS_PER_SECOND, API_BACKOFF_MAX_MS);
-  }
-  return exponentialBackoff(attempt);
-}
+const BACKOFF: BackoffLimits = { baseMs: API_BACKOFF_BASE_MS, maxMs: API_BACKOFF_MAX_MS };
 
 /* -------------------------------------------------------------------------- */
 /* Spent allowances                                                            */
@@ -178,7 +166,7 @@ async function call(url: string, label: string): Promise<unknown> {
       if (attempt >= API_RETRIES) {
         throw new TransientWeatherError(`${label} unreachable: ${String(cause)}`);
       }
-      await sleep(exponentialBackoff(attempt));
+      await sleep(exponentialBackoff(attempt, BACKOFF));
       continue;
     }
 
@@ -203,13 +191,13 @@ async function call(url: string, label: string): Promise<unknown> {
       }
     }
 
-    const retryable = isRetryable(response.status);
+    const retryable = isRetryableStatus(response.status);
     if (!retryable || attempt >= API_RETRIES) {
       const message = `${label} ${response.status}`;
       throw retryable ? new TransientWeatherError(message) : new Error(message);
     }
 
-    await sleep(backoffFor(response, attempt));
+    await sleep(backoffForResponse(response, attempt, BACKOFF));
   }
 }
 
