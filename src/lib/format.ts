@@ -53,13 +53,13 @@ const ISO_DATE_LENGTH = 'YYYY-MM-DD'.length;
  * asked for — anything else invites it to resolve "next Friday" against a
  * locale rather than against a day.
  */
-export function isoDate(date: Date): string {
+export function formatIsoDate(date: Date): string {
   return date.toISOString().slice(0, ISO_DATE_LENGTH);
 }
 
 /** Today, for grounding the model's relative-date reasoning. */
-export function todayIso(): string {
-  return isoDate(new Date());
+export function todayIsoDate(): string {
+  return formatIsoDate(new Date());
 }
 
 /**

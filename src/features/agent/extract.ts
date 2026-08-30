@@ -15,7 +15,7 @@ import {
 import type { FlowStep } from '@/features/trip/flow';
 import { isDeclineReply } from '@/features/trip/flow';
 import { CLIMATE_PREFERENCES } from '@/features/weather/shared';
-import { todayIso } from '@/lib/format';
+import { todayIsoDate } from '@/lib/format';
 
 import { conversationModel } from './provider';
 import type { UnusableKind } from './rejection';
@@ -133,7 +133,7 @@ function clearDeclinedField(extraction: Extraction, step: FlowStep): Extraction 
    *
    * Cleared here, at the one place a decline is already interpreted against the
    * step, so nothing downstream has to know that `declined` is only meaningful on
-   * some questions. `advance` had this right for its own purposes and read
+   * some questions. `advanceFlow` had this right for its own purposes and read
    * `step.decline` before trusting the flag; everything else took it at face value.
    */
   if (!step.decline) return { ...extraction, declined: false };
@@ -175,7 +175,7 @@ const EMPTY_EXTRACTION: Extraction = {
  * matching what the brief already holds is not news either. Folded and trimmed so
  * that "lisbon" against "Lisbon" is recognised as the echo it is.
  */
-function changed(reported: string | null, held: string): boolean {
+function reportsNewValue(reported: string | null, held: string): boolean {
   return reported !== null && reported.trim().toLowerCase() !== held.trim().toLowerCase();
 }
 
@@ -213,12 +213,12 @@ function reportedAnything(extraction: Extraction, brief: TripBrief): boolean {
   }
 
   // Disclosed as context, so only a change counts.
-  if (changed(extraction.destination, brief.destination)) return true;
-  if (changed(extraction.origin, brief.origin)) return true;
-  if (changed(extraction.dates, brief.dates)) return true;
-  if (changed(extraction.budgetLevel, brief.budgetLevel)) return true;
-  if (changed(extraction.climate, brief.climate)) return true;
-  if (changed(extraction.travelerType, brief.travelerType)) return true;
+  if (reportsNewValue(extraction.destination, brief.destination)) return true;
+  if (reportsNewValue(extraction.origin, brief.origin)) return true;
+  if (reportsNewValue(extraction.dates, brief.dates)) return true;
+  if (reportsNewValue(extraction.budgetLevel, brief.budgetLevel)) return true;
+  if (reportsNewValue(extraction.climate, brief.climate)) return true;
+  if (reportsNewValue(extraction.travelerType, brief.travelerType)) return true;
   if (extraction.maxTotalUsd !== null && extraction.maxTotalUsd !== brief.maxTotalUsd) return true;
 
   const known = new Set(brief.interests.map((interest) => interest.toLowerCase()));
@@ -276,7 +276,7 @@ export async function extractBrief(
       temperature: EXTRACTION_TEMPERATURE,
       system: [
         "You extract structured trip details from a traveler's message.",
-        `Today is ${todayIso()}. Resolve relative dates against it, and assume a future date when the year is ambiguous.`,
+        `Today is ${todayIsoDate()}. Resolve relative dates against it, and assume a future date when the year is ambiguous.`,
         'Report only what this message states or clearly implies. Use null for anything absent.',
         'Do not guess a destination from a nationality, a currency or a language.',
         // Without this the phrase itself gets recorded as the place, and the trip is

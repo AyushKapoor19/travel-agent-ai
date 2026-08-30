@@ -2,8 +2,8 @@
 
 import { motion } from 'motion/react';
 
-import { cn } from '@/lib/cn';
-import { ease, stagger } from '@/lib/design/motion';
+import { classNames } from '@/lib/class-names';
+import { easeTransition, stagger } from '@/lib/design/motion';
 
 type QuickReplyChipProps = {
   label: string;
@@ -41,9 +41,9 @@ export function QuickReplyChip({
       aria-pressed={selected}
       initial={{ opacity: 0, y: RISE_PX }}
       animate={{ opacity: 1, y: 0 }}
-      transition={ease(REVEAL_SECONDS, stagger(index))}
+      transition={easeTransition(REVEAL_SECONDS, stagger(index))}
       whileTap={disabled ? undefined : { scale: TAP_SCALE }}
-      className={cn(
+      className={classNames(
         'rounded-full border px-3.5 py-1.5 text-[0.8125rem] tracking-[-0.01em]',
         selected ? 'chip-selected' : 'btn-ghost',
         disabled && 'cursor-not-allowed opacity-40',

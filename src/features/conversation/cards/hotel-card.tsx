@@ -1,6 +1,6 @@
 import type { HotelResult } from '@/features/travel/types';
 import { formatCount, formatPrice, formatStars } from '@/lib/format';
-import { nameKey } from '@/lib/name-key';
+import { placeNameKey } from '@/lib/place-name-key';
 
 import { ResultCard } from './result-card';
 
@@ -70,5 +70,5 @@ function photoCaption(hotel: HotelResult): string | undefined {
   const subject = hotel.image?.subject;
   if (!subject) return undefined;
 
-  return nameKey(subject) === nameKey(hotel.name) ? undefined : NEARBY_CAPTION;
+  return placeNameKey(subject) === placeNameKey(hotel.name) ? undefined : NEARBY_CAPTION;
 }

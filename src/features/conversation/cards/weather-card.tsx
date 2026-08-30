@@ -1,5 +1,5 @@
 import type { ClimateReport } from '@/features/weather/shared';
-import { cn } from '@/lib/cn';
+import { classNames } from '@/lib/class-names';
 
 import { AsideNote } from './band';
 
@@ -82,7 +82,7 @@ export function WeatherCard({ report }: WeatherCardProps) {
               aria-label={`${entry.month}: high ${Math.round(entry.avgHighC)} degrees, low ${Math.round(entry.avgLowC)}, ${entry.rain}`}
             >
               <div
-                className={cn(
+                className={classNames(
                   'w-full transition-colors',
                   isTravelMonth ? 'bg-accent' : isBest ? 'bg-ink/28' : 'bg-ink/10',
                 )}
@@ -97,7 +97,7 @@ export function WeatherCard({ report }: WeatherCardProps) {
         {year.map((entry) => (
           <li
             key={entry.month}
-            className={cn(
+            className={classNames(
               'figure flex-1 text-center text-[0.625rem] leading-none',
               entry.month === month?.month
                 ? 'text-ink'

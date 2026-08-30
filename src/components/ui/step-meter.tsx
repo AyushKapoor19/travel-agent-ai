@@ -2,8 +2,8 @@
 
 import { AnimatePresence, motion } from 'motion/react';
 
-import { cn } from '@/lib/cn';
-import { ease } from '@/lib/design/motion';
+import { classNames } from '@/lib/class-names';
+import { easeTransition } from '@/lib/design/motion';
 
 type StepMeterProps = {
   /** Zero-based position of the question being asked. */
@@ -41,7 +41,7 @@ export function StepMeter({ index, total, className }: StepMeterProps) {
   const position = Math.min(index + 1, total);
 
   return (
-    <p className={cn('figure text-[0.8125rem] text-ink-muted', className)}>
+    <p className={classNames('figure text-[0.8125rem] text-ink-muted', className)}>
       {/* Fixed to the width of the figure it holds, so the slash does not step sideways
           as the number is handed over. */}
       <span className="relative inline-block w-[2ch] overflow-hidden text-ink align-bottom">
@@ -51,7 +51,7 @@ export function StepMeter({ index, total, className }: StepMeterProps) {
             initial={{ opacity: 0, y: COUNT_RISE_PX }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -COUNT_RISE_PX }}
-            transition={ease(COUNT_SECONDS)}
+            transition={easeTransition(COUNT_SECONDS)}
             className="inline-block"
           >
             {pad(position)}

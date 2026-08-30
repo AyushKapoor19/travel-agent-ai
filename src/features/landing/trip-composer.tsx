@@ -7,8 +7,8 @@ import { AnimatePresence, motion } from 'motion/react';
 import { AnswerField } from '@/components/ui/answer-field';
 import { QuickReplyChip } from '@/components/ui/quick-reply-chip';
 import { RouteWait } from '@/components/ui/route-wait';
-import { cn } from '@/lib/cn';
-import { ease } from '@/lib/design/motion';
+import { classNames } from '@/lib/class-names';
+import { easeTransition } from '@/lib/design/motion';
 
 import { useTripHandoff } from './trip-handoff';
 
@@ -49,7 +49,7 @@ export function TripComposer({ id, openers, className }: TripComposerProps) {
   const [value, setValue] = useState('');
 
   return (
-    <div className={cn('w-full text-left', className)}>
+    <div className={classNames('w-full text-left', className)}>
       <AnswerField
         id={id}
         value={value}
@@ -70,7 +70,7 @@ export function TripComposer({ id, openers, className }: TripComposerProps) {
                 key="wait"
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
-                transition={ease(CLEAR_SECONDS)}
+                transition={easeTransition(CLEAR_SECONDS)}
               >
                 <RouteWait label="Reading that" />
               </motion.div>
@@ -78,7 +78,7 @@ export function TripComposer({ id, openers, className }: TripComposerProps) {
               <motion.div
                 key="openers"
                 exit={{ opacity: 0 }}
-                transition={ease(CLEAR_SECONDS)}
+                transition={easeTransition(CLEAR_SECONDS)}
                 // Wider than the field they sit under: constrained to it, the four of
                 // them break 3 + 1 and strand "Surprise me" on a line of its own, which
                 // reads as an afterthought rather than as one of the four ways in.

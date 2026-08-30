@@ -7,7 +7,7 @@ import { cacheKey, createTtlCache } from '@/features/serpapi/cache';
 import { serpApiSearch } from '@/features/serpapi/client';
 import { SerpApiEngine } from '@/features/serpapi/constants';
 import { numericField } from '@/features/serpapi/schema';
-import { nameKey } from '@/lib/name-key';
+import { placeNameKey } from '@/lib/place-name-key';
 
 import { BookingProvider, hotelSearchUrl } from './booking-links';
 import type { BudgetLevel, HotelProvider, HotelQuery, HotelResult } from './types';
@@ -260,7 +260,7 @@ async function buildHotels(query: HotelQuery, destination: string): Promise<Hote
   const { properties, rooms } = await fetchForParty(query, destination);
 
   return preferRated(properties).map((property, index) => ({
-    id: `hotel-${nameKey(property.name) || index}`,
+    id: `hotel-${placeNameKey(property.name) || index}`,
     name: property.name,
     type: property.type?.trim() ?? null,
     pricePerNight: forRooms(property.rate_per_night?.extracted_lowest, rooms),

@@ -3,7 +3,7 @@ import 'server-only';
 import type { TripBrief } from '@/features/trip/brief';
 import { describeTrip, isDestinationOpen, missingDateDetail } from '@/features/trip/brief';
 import type { FlowStep } from '@/features/trip/flow';
-import { todayIso } from '@/lib/format';
+import { todayIsoDate } from '@/lib/format';
 
 const PERSONA = `You are Wayfare, a senior travel agent with 20 years of experience planning trips worldwide.
 You are warm, concrete, and opinionated — travelers come to you because you make decisions easy.`;
@@ -256,7 +256,7 @@ The days and "## Good to know" are the only headings you write. The stays, the t
     HONESTY,
     WEATHER_HONESTY,
     CULTURAL_INSIGHT,
-    `Today's date is ${todayIso()}.`,
+    `Today's date is ${todayIsoDate()}.`,
     `The traveler's brief:\n${describeTrip(brief)}`,
   ].join('\n\n');
 }

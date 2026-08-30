@@ -4,7 +4,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 
 import { useChat } from '@ai-sdk/react';
 
-import { partsText } from '@/features/agent/message-text';
+import { textFromParts } from '@/features/agent/message-text';
 import type { TurnPhase, TurnRejection, WayfareUIMessage } from '@/features/agent/messages';
 import { TurnKind } from '@/features/agent/messages';
 import type { TripBrief } from '@/features/trip/brief';
@@ -43,7 +43,7 @@ function withoutRefusedTurn(messages: WayfareUIMessage[]): WayfareUIMessage[] {
   const kept = [...messages];
 
   const reply = kept[kept.length - 1];
-  if (reply?.role !== 'assistant' || partsText(reply.parts).length > 0) return messages;
+  if (reply?.role !== 'assistant' || textFromParts(reply.parts).length > 0) return messages;
   kept.pop();
 
   if (kept[kept.length - 1]?.role === 'user') kept.pop();

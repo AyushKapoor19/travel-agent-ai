@@ -2,7 +2,7 @@
 
 import { useEffect, useRef } from 'react';
 
-import { cn } from '@/lib/cn';
+import { classNames } from '@/lib/class-names';
 
 import { MAX_FRAME_SECONDS } from './constants';
 import { GlobeScene } from './globe-scene';
@@ -138,5 +138,5 @@ export function EarthGlobe({ onReady, className }: EarthGlobeProps) {
   // `h-full w-full` is load-bearing: a canvas is a replaced element, so `inset-0`
   // on its own leaves it at its intrinsic 300×150 rather than stretching it, and
   // the scene reads its client box to size the sphere.
-  return <canvas ref={canvasRef} className={cn('h-full w-full', className)} />;
+  return <canvas ref={canvasRef} className={classNames('h-full w-full', className)} />;
 }

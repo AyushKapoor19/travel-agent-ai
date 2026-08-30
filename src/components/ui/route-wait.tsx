@@ -1,4 +1,4 @@
-import { cn } from '@/lib/cn';
+import { classNames } from '@/lib/class-names';
 
 type RouteWaitProps = {
   /** What is being waited for. Read out to assistive technology as well as drawn. */
@@ -22,7 +22,7 @@ type RouteWaitProps = {
  */
 export function RouteWait({ label, className }: RouteWaitProps) {
   return (
-    <div className={cn('flex items-center gap-4', className)} role="status">
+    <div className={classNames('flex items-center gap-4', className)} role="status">
       <span className="label shrink-0 text-ink-muted">{label}</span>
       <span aria-hidden className="route-track max-w-40 flex-1">
         <span className="route-mark" />

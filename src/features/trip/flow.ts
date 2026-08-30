@@ -246,7 +246,7 @@ export function isBriefComplete(brief: TripBrief): boolean {
  * same words uses the ASCII one, so a comparison that did not fold them would
  * recognise "I'd rather not say" pressed and not "I'd rather not say" typed.
  */
-function normalise(text: string): string {
+function normalizeReply(text: string): string {
   return text
     .toLowerCase()
     .replaceAll(/['‘’]/gu, '')
@@ -266,8 +266,8 @@ function normalise(text: string): string {
  */
 export function isDeclineReply(step: FlowStep, message: string): boolean {
   if (!step.decline) return false;
-  const reply = normalise(message);
-  return reply.length > 0 && step.decline.chips.some((chip) => normalise(chip) === reply);
+  const reply = normalizeReply(message);
+  return reply.length > 0 && step.decline.chips.some((chip) => normalizeReply(chip) === reply);
 }
 
 /**
@@ -326,7 +326,7 @@ function isSettled(brief: TripBrief, step: FlowStep, declined: boolean): boolean
  * "two of us in Tokyo for a week, mid-range, we love food" has answered five
  * questions in one sentence, and asking them again would be insulting.
  */
-export function advance(brief: TripBrief, current: FlowStep, declined: boolean): TripBrief {
+export function advanceFlow(brief: TripBrief, current: FlowStep, declined: boolean): TripBrief {
   const currentDone = isSettled(brief, current, declined);
 
   const answered = [...brief.answered];

@@ -7,7 +7,7 @@ import { cacheKey, createTtlCache } from '@/features/serpapi/cache';
 import { serpApiSearch } from '@/features/serpapi/client';
 import { SerpApiEngine } from '@/features/serpapi/constants';
 import { numericField } from '@/features/serpapi/schema';
-import { nameKey } from '@/lib/name-key';
+import { placeNameKey } from '@/lib/place-name-key';
 
 import { activitySearchUrl, BookingProvider } from './booking-links';
 import type { ActivityProvider, ActivityQuery, ActivityResult } from './types';
@@ -117,7 +117,7 @@ function usableDescription(text: string | undefined): string | null {
  * differently across surfaces, and a strict equality join silently drops the
  * price off half the set.
  */
-const joinKey = nameKey;
+const joinKey = placeNameKey;
 
 /** Takes a partial so a local result with no matching sight resolves to no price. */
 function priceFrom(sight: { price?: string | undefined; extracted_price?: number | undefined }): {

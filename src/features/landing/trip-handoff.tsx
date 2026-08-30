@@ -7,7 +7,7 @@ import { AnimatePresence, motion } from 'motion/react';
 
 import { SiteHeader } from '@/components/ui/site-header';
 import { setPendingMessage } from '@/features/trip/handoff';
-import { ease } from '@/lib/design/motion';
+import { easeTransition } from '@/lib/design/motion';
 
 /**
  * How long the landing page has to get out of the way before the route changes.
@@ -107,7 +107,7 @@ export function TripHandoffProvider({ children }: { children: ReactNode }) {
             key="frame"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
-            transition={ease(DISSOLVE_SECONDS)}
+            transition={easeTransition(DISSOLVE_SECONDS)}
             // Above the panels and below nothing: this is the next page's chrome,
             // arriving early. Inert and hidden, because a second wordmark that can be
             // tabbed to or announced is scenery pretending to be furniture.

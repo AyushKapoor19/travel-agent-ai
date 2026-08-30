@@ -109,7 +109,7 @@ describe('a reading that only repeats what the model was told', () => {
    * "hey" on the dates question, for a trip already known to be going to Lisbon,
    * comes back as `{ destination: "Lisbon" }` — the model is shown the brief as
    * context and handing a piece of it back is not obviously wrong to it. Counted as
-   * news, that one echo cleared the check, `advance` marked dates answered on the
+   * news, that one echo cleared the check, `advanceFlow` marked dates answered on the
    * strength of it, and the planning turn went looking for a stay with no dates to
    * price it for.
    */

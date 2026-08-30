@@ -1,6 +1,6 @@
 import 'server-only';
 
-import { nameKey } from '@/lib/name-key';
+import { placeNameKey } from '@/lib/place-name-key';
 import { nightsBetween } from '@/lib/time';
 
 import { activityProvider } from './activities';
@@ -139,8 +139,8 @@ function lodgingFor(
   requested: string | undefined,
 ): CostEstimate['lodging'] {
   if (requested) {
-    const wanted = nameKey(requested);
-    const match = hotels.find((hotel) => nameKey(hotel.name) === wanted);
+    const wanted = placeNameKey(requested);
+    const match = hotels.find((hotel) => placeNameKey(hotel.name) === wanted);
     const priced = match ? priceOf(match, nights, 'recommended') : null;
     if (priced) return priced;
   }

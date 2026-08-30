@@ -4,7 +4,7 @@ import { useEffect, useRef } from 'react';
 
 import { motion } from 'motion/react';
 
-import { cn } from '@/lib/cn';
+import { classNames } from '@/lib/class-names';
 
 /** Past this the field scrolls rather than growing, so the rule cannot walk off screen. */
 const MAX_HEIGHT_PX = 132;
@@ -138,7 +138,7 @@ export function AnswerField({
             type="submit"
             disabled={!armed || busy}
             whileTap={{ scale: 0.94 }}
-            className={cn(
+            className={classNames(
               'flex h-9 w-9 shrink-0 items-center justify-center rounded-full border text-[0.9375rem]',
               // Hairline until there is something to send, then the full fill: not
               // "you cannot", just "not yet". Stays filled through a hand-off, which

@@ -243,7 +243,7 @@ describe('a place the geocoder cannot find', () => {
       candidates: [MEXICO[1]!, { city: 'Atlantis', country: 'Mexico', why: 'Invented.' }],
     });
 
-    expect(shortlist.destinations.map((d) => d.city)).toEqual(['Mérida']);
+    expect(shortlist.destinations.map((destination) => destination.city)).toEqual(['Mérida']);
     expect(shortlist.rejected).toEqual([{ city: 'Atlantis', reason: 'unmappable' }]);
   });
 
@@ -338,6 +338,6 @@ describe('a stated climate preference', () => {
       limit: 1,
     });
 
-    expect(shortlist.destinations.map((d) => d.city)).toEqual(['Mérida']);
+    expect(shortlist.destinations.map((destination) => destination.city)).toEqual(['Mérida']);
   });
 });

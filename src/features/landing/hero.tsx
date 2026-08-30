@@ -5,7 +5,7 @@ import { motion } from 'motion/react';
 import { LineReveal } from '@/components/motion/line-reveal';
 import { ScrollCue } from '@/components/panels/scroll-cue';
 import { SiteHeader } from '@/components/ui/site-header';
-import { ease } from '@/lib/design/motion';
+import { easeTransition } from '@/lib/design/motion';
 
 import { Earth } from './earth/earth';
 import { TripComposer } from './trip-composer';
@@ -65,7 +65,11 @@ export function Hero() {
           {/* The leaving is a layer in, not on the `anime` element itself: the scroller
               writes that one's transform on the way back to this panel, and two engines
               on one `transform` is a headline that jumps. */}
-          <motion.span animate={answered} transition={ease(LEAVE_SECONDS)} className="block">
+          <motion.span
+            animate={answered}
+            transition={easeTransition(LEAVE_SECONDS)}
+            className="block"
+          >
             <LineReveal
               immediate
               delay={0.1}
@@ -83,7 +87,7 @@ export function Hero() {
           <motion.p
             initial={{ opacity: 0, y: 14 }}
             animate={answered}
-            transition={leaving ? ease(LEAVE_SECONDS) : ease(1, 0.36)}
+            transition={leaving ? easeTransition(LEAVE_SECONDS) : easeTransition(1, 0.36)}
             className="lede mt-6 max-w-lg text-pretty text-ink-soft sm:mt-7"
           >
             One conversation, a handful of questions, and a day-by-day itinerary built from real
@@ -95,7 +99,7 @@ export function Hero() {
           <motion.div
             initial={{ opacity: 0, y: 18 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={ease(1, 0.48)}
+            transition={easeTransition(1, 0.48)}
           >
             <TripComposer id="trip-opener" openers={OPENERS} className="mt-9 sm:mt-10" />
           </motion.div>

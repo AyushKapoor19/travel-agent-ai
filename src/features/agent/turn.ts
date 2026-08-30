@@ -6,7 +6,7 @@ import { convertToModelMessages, stepCountIs, streamText } from 'ai';
 import { buildPlanningPrompt, buildQuestionPrompt } from '@/features/agent/prompt';
 import type { TripBrief } from '@/features/trip/brief';
 import type { FlowStep } from '@/features/trip/flow';
-import { advance, canReject, nextStep, recordRejection } from '@/features/trip/flow';
+import { advanceFlow, canReject, nextStep, recordRejection } from '@/features/trip/flow';
 
 import { extractBrief } from './extract';
 import { lastUserText } from './message-text';
@@ -92,7 +92,7 @@ export async function runTurn({
     }
 
     if (declined) declinedStep = askedStep;
-    brief = advance(extracted, askedStep, declined);
+    brief = advanceFlow(extracted, askedStep, declined);
   }
 
   writer.write({ type: 'data-brief', data: brief, transient: true });

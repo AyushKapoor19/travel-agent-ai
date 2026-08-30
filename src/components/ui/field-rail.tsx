@@ -2,8 +2,8 @@
 
 import { motion } from 'motion/react';
 
-import { cn } from '@/lib/cn';
-import { ease } from '@/lib/design/motion';
+import { classNames } from '@/lib/class-names';
+import { easeTransition } from '@/lib/design/motion';
 
 /**
  * How firmly a field is held, which is the only thing the rail draws differently.
@@ -64,14 +64,14 @@ export function FieldRail({
   className,
 }: FieldRailProps) {
   return (
-    <dl className={cn('flex flex-wrap gap-x-8 gap-y-3.5', className)}>
+    <dl className={classNames('flex flex-wrap gap-x-8 gap-y-3.5', className)}>
       {fields.map((field) => {
         const active = field.id === activeId;
 
         return (
           <div
             key={field.id}
-            className={cn(
+            className={classNames(
               // The rule under the active cell is the same rule the answer is being
               // typed on above it, which is what ties the question to the field it
               // fills. Transparent elsewhere rather than absent, so nothing shifts
@@ -87,7 +87,7 @@ export function FieldRail({
                 hierarchy in this cell: the answer is the content and the label is
                 the annotation, and they are within a size of each other. */}
             <dt
-              className={cn(
+              className={classNames(
                 'label text-[0.6875rem] transition-colors duration-500 ease-wayfare',
                 active ? 'text-ink' : 'text-ink-muted',
               )}
@@ -96,7 +96,7 @@ export function FieldRail({
             </dt>
             <dd
               title={field.value}
-              className={cn(
+              className={classNames(
                 'mt-1 truncate text-[0.875rem] tracking-[-0.015em]',
                 TONE_CLASS[field.tone],
               )}
@@ -109,7 +109,7 @@ export function FieldRail({
                 key={field.value}
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
-                transition={ease(0.45)}
+                transition={easeTransition(0.45)}
               >
                 {field.value}
               </motion.span>

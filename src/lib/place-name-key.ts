@@ -11,7 +11,7 @@
  * Both were doing it with their own private normaliser, which is exactly how the
  * two answers drift apart.
  */
-export function nameKey(value: string): string {
+export function placeNameKey(value: string): string {
   return value
     .normalize('NFD')
     .replace(/\p{Diacritic}/gu, '')

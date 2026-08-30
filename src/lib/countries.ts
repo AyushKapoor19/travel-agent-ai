@@ -1,4 +1,4 @@
-import { nameKey } from './name-key';
+import { placeNameKey } from './place-name-key';
 
 /**
  * Reconciling the names two systems give the same country.
@@ -22,7 +22,7 @@ import { nameKey } from './name-key';
  * Not a complete gazetteer, and not meant to be — a full ISO table would be dead
  * weight when the only cases that matter are the ones where a traveller's word and
  * an official register genuinely differ. Everything else already compares equal
- * once accents and punctuation are folded, which `nameKey` does.
+ * once accents and punctuation are folded, which `placeNameKey` does.
  *
  * Constituent countries of the UK are folded in on purpose: a model asked for the
  * country of Edinburgh will say Scotland, and it is not wrong.
@@ -85,7 +85,7 @@ const STATE_FORM_PREFIX =
 
 const GROUP_FOR_KEY = new Map<string, readonly string[]>();
 for (const group of ALIAS_GROUPS) {
-  for (const name of group) GROUP_FOR_KEY.set(nameKey(name), group);
+  for (const name of group) GROUP_FOR_KEY.set(placeNameKey(name), group);
 }
 
 /** Every name this country answers to, folded for comparison. */
@@ -105,18 +105,18 @@ function countryKeys(name: string): Set<string> {
    * card. Names the table does not list still fall through to stripping below,
    * which is what "Kingdom of Morocco" needs.
    */
-  const listed = GROUP_FOR_KEY.get(nameKey(trimmed));
+  const listed = GROUP_FOR_KEY.get(placeNameKey(trimmed));
   if (listed) {
-    for (const member of listed) keys.add(nameKey(member));
+    for (const member of listed) keys.add(placeNameKey(member));
     return keys;
   }
 
   for (const variant of [trimmed, trimmed.replace(STATE_FORM_PREFIX, '')]) {
-    const key = nameKey(variant);
+    const key = placeNameKey(variant);
     if (!key) continue;
 
     keys.add(key);
-    for (const member of GROUP_FOR_KEY.get(key) ?? []) keys.add(nameKey(member));
+    for (const member of GROUP_FOR_KEY.get(key) ?? []) keys.add(placeNameKey(member));
   }
 
   return keys;
@@ -159,7 +159,7 @@ export function shortCountryName(name: string): string {
   const stripped = trimmed.replace(STATE_FORM_PREFIX, '').trim();
 
   for (const variant of [trimmed, stripped]) {
-    const group = GROUP_FOR_KEY.get(nameKey(variant));
+    const group = GROUP_FOR_KEY.get(placeNameKey(variant));
     if (group?.[0]) return group[0];
   }
 

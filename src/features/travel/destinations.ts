@@ -13,7 +13,7 @@ import {
 import { shortCountryName } from '@/lib/countries';
 import { formatPrice } from '@/lib/format';
 import { monthName, monthsAdjacent } from '@/lib/months';
-import { nameKey } from '@/lib/name-key';
+import { placeNameKey } from '@/lib/place-name-key';
 import { nightsBetween } from '@/lib/time';
 
 import { activityProvider } from './activities';
@@ -171,7 +171,8 @@ function placeQuery(verified: Verified): string {
 function representativeHighC({ month, normals, bestMonths }: Measured): number {
   if (month) return month.avgHighC;
 
-  const months = bestMonths.length > 0 ? bestMonths : normals.months.map((m) => m.monthIndex);
+  const months =
+    bestMonths.length > 0 ? bestMonths : normals.months.map((normal) => normal.monthIndex);
   const total = months.reduce((sum, index) => sum + (normals.months[index]?.avgHighC ?? 0), 0);
   return total / months.length;
 }
@@ -513,7 +514,7 @@ const verifyingProvider: DestinationProvider = {
       const { candidate, cost } = entry;
 
       return {
-        id: `destination-${nameKey(candidate.city)}`,
+        id: `destination-${placeNameKey(candidate.city)}`,
         // The traveller's and the model's own word for the place, so the card agrees
         // with the prose beside it. Only the lookups use the resolved spelling.
         city: candidate.city,

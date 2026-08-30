@@ -1,4 +1,4 @@
-import { cn } from '@/lib/cn';
+import { classNames } from '@/lib/class-names';
 
 import { photoCreditLabel, photoCreditTitle } from './credit';
 import type { PlaceImage } from './types';
@@ -36,7 +36,7 @@ export function PhotoCreditLink({
       target="_blank"
       rel="noopener noreferrer"
       title={photoCreditTitle(image, { context })}
-      className={cn('truncate', className)}
+      className={classNames('truncate', className)}
     >
       {variant === 'full' ? photoCreditLabel(image) : image.credit}
     </a>

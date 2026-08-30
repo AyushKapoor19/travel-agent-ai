@@ -95,7 +95,7 @@ function asArray(value: unknown): unknown[] {
   return Array.isArray(value) ? value : [];
 }
 
-function matches(haystack: string, markers: readonly string[]): boolean {
+function containsAnyMarker(haystack: string, markers: readonly string[]): boolean {
   const text = haystack.toLowerCase();
   return markers.some((marker) => text.includes(marker));
 }
@@ -143,9 +143,9 @@ const serpApi: VendorSpec = {
 
   classify(status, stated) {
     if (stated) {
-      if (matches(stated, SERPAPI_EMPTY_MARKERS)) return Outcome.EMPTY;
-      if (matches(stated, SERPAPI_AUTH_MARKERS)) return Outcome.AUTH;
-      if (matches(stated, SERPAPI_QUOTA_MARKERS)) return Outcome.QUOTA;
+      if (containsAnyMarker(stated, SERPAPI_EMPTY_MARKERS)) return Outcome.EMPTY;
+      if (containsAnyMarker(stated, SERPAPI_AUTH_MARKERS)) return Outcome.AUTH;
+      if (containsAnyMarker(stated, SERPAPI_QUOTA_MARKERS)) return Outcome.QUOTA;
     }
 
     if (status < HttpStatus.BAD_REQUEST) return Outcome.OK;

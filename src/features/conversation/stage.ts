@@ -1,6 +1,6 @@
 import { isToolUIPart } from 'ai';
 
-import { partsText } from '@/features/agent/message-text';
+import { textFromParts } from '@/features/agent/message-text';
 import type { WayfareMessagePart, WayfareUIMessage } from '@/features/agent/messages';
 import { looksLikeItinerary } from '@/features/itinerary/parse';
 
@@ -78,13 +78,13 @@ export type Stage =
 function isPlan(message: WayfareUIMessage): boolean {
   if (message.role !== 'assistant') return false;
   if (message.parts.some(isToolUIPart)) return true;
-  return looksLikeItinerary(partsText(message.parts));
+  return looksLikeItinerary(textFromParts(message.parts));
 }
 
 /** Whether this reply wrote the day-by-day, which is what a document is made of. */
 function wroteDays(message: WayfareUIMessage): boolean {
   if (message.role !== 'assistant') return false;
-  return looksLikeItinerary(partsText(message.parts));
+  return looksLikeItinerary(textFromParts(message.parts));
 }
 
 /**
@@ -178,7 +178,7 @@ export function readStage(messages: readonly WayfareUIMessage[], planning: boole
 
   return {
     kind: StageKind.INTAKE,
-    prompt: asking ? partsText(asking.parts) : '',
+    prompt: asking ? textFromParts(asking.parts) : '',
     promptId: asking?.id ?? null,
   };
 }

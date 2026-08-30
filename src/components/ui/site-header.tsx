@@ -2,7 +2,7 @@ import Link from 'next/link';
 
 import type { ReactNode } from 'react';
 
-import { cn } from '@/lib/cn';
+import { classNames } from '@/lib/class-names';
 
 import { Orb } from './orb';
 
@@ -37,7 +37,7 @@ type SiteHeaderProps = {
 export function SiteHeader({ active = false, rule = false, children, className }: SiteHeaderProps) {
   return (
     <header
-      className={cn(
+      className={classNames(
         'relative z-20 shrink-0',
         // The rule runs the width of the window while the row inside it sits in the
         // page's gutter, so the wordmark is in the corner of the page rather than in

@@ -1,7 +1,7 @@
 'use client';
 
 import { QuickReplyChip } from '@/components/ui/quick-reply-chip';
-import { cn } from '@/lib/cn';
+import { classNames } from '@/lib/class-names';
 
 type QuickRepliesProps = {
   chips: readonly string[];
@@ -39,7 +39,7 @@ export function QuickReplies({
   className,
 }: QuickRepliesProps) {
   return (
-    <div className={cn('flex flex-wrap gap-2', className)}>
+    <div className={classNames('flex flex-wrap gap-2', className)}>
       {chips.map((chip, index) => (
         <QuickReplyChip
           key={chip}

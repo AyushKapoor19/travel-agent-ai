@@ -8,7 +8,7 @@ import { Markdown } from '@/components/ui/markdown';
 import { RouteWait } from '@/components/ui/route-wait';
 import { FLOW_STEPS } from '@/features/trip/flow';
 import { tripStub } from '@/features/trip/stub';
-import { ease } from '@/lib/design/motion';
+import { easeTransition } from '@/lib/design/motion';
 
 import { AnswerRejected } from './answer-rejected';
 import { ChatError } from './chat-error';
@@ -155,8 +155,8 @@ export function IntakeStage({ conversation, prompt, promptId }: IntakeStageProps
               // The exit carries its own timing, so only the leaving is hurried. The
               // dimming in place — which is what happens while their answer is being
               // read — keeps the arrival's unhurried pace.
-              exit={{ opacity: 0, y: -ASK_RISE_PX, transition: ease(ASK_LEAVE_SECONDS) }}
-              transition={ease(promptId ? ASK_ARRIVE_SECONDS : ASK_OPEN_SECONDS)}
+              exit={{ opacity: 0, y: -ASK_RISE_PX, transition: easeTransition(ASK_LEAVE_SECONDS) }}
+              transition={easeTransition(promptId ? ASK_ARRIVE_SECONDS : ASK_OPEN_SECONDS)}
             >
               <Markdown content={question} variant="ask" />
             </motion.div>
@@ -191,8 +191,8 @@ export function IntakeStage({ conversation, prompt, promptId }: IntakeStageProps
                 key={transient}
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
-                exit={{ opacity: 0, transition: ease(ASK_LEAVE_SECONDS) }}
-                transition={ease(ASK_ARRIVE_SECONDS)}
+                exit={{ opacity: 0, transition: easeTransition(ASK_LEAVE_SECONDS) }}
+                transition={easeTransition(ASK_ARRIVE_SECONDS)}
               >
                 {error ? (
                   <ChatError message={error.message} onRetry={conversation.retry} />

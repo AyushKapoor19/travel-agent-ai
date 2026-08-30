@@ -2,7 +2,7 @@ import { describe, expect, it } from 'vitest';
 
 import { emptyTripBrief, type StepId, type TripBrief } from './brief';
 import {
-  advance,
+  advanceFlow,
   canReject,
   FLOW_STEPS,
   type FlowStep,
@@ -78,9 +78,9 @@ describe('isDeclineReply', () => {
   });
 });
 
-describe('advance', () => {
+describe('advanceFlow', () => {
   it('marks a step answered once the brief holds a value for it', () => {
-    const after = advance(briefWith({ destination: 'Lisbon' }), stepFor('destination'), false);
+    const after = advanceFlow(briefWith({ destination: 'Lisbon' }), stepFor('destination'), false);
     expect(after.answered).toEqual(['destination']);
     expect(after.retries).toBe(0);
   });
@@ -88,7 +88,7 @@ describe('advance', () => {
   /**
    * The bug this file was written for.
    *
-   * "Not flying" reached `advance` as a reply that had failed to name an airport,
+   * "Not flying" reached `advanceFlow` as a reply that had failed to name an airport,
    * because the extractor had been told what refusing looks like and not what a
    * question being moot looks like. The step stayed open and was asked again. The
    * rule now does not depend on that reading being right: origin is optional, so it
@@ -97,7 +97,7 @@ describe('advance', () => {
   it('never asks an optional question twice, however the reply was read', () => {
     const asked = briefWith({ destination: 'Mexico City', answered: ['destination'] });
 
-    const after = advance(asked, stepFor('origin'), false);
+    const after = advanceFlow(asked, stepFor('origin'), false);
 
     expect(after.answered).toContain('origin');
     expect(after.origin).toBe('');
@@ -107,7 +107,7 @@ describe('advance', () => {
   it('settles an optional step when the traveler declines it outright', () => {
     const asked = briefWith({ destination: 'Mexico City', answered: ['destination'] });
 
-    const after = advance(asked, stepFor('origin'), true);
+    const after = advanceFlow(asked, stepFor('origin'), true);
 
     expect(after.answered).toContain('origin');
     expect(after.retries).toBe(0);
@@ -120,7 +120,7 @@ describe('advance', () => {
       answered: ['destination'],
     });
 
-    expect(advance(asked, stepFor('origin'), false).origin).toBe('Boston');
+    expect(advanceFlow(asked, stepFor('origin'), false).origin).toBe('Boston');
   });
 
   /**
@@ -129,11 +129,11 @@ describe('advance', () => {
    * bigger silent substitution than doing without a fare.
    */
   it('gives the destination one more attempt before leaving it open', () => {
-    const first = advance(emptyTripBrief, stepFor('destination'), false);
+    const first = advanceFlow(emptyTripBrief, stepFor('destination'), false);
     expect(first.answered).not.toContain('destination');
     expect(first.retries).toBe(1);
 
-    const second = advance(first, stepFor('destination'), false);
+    const second = advanceFlow(first, stepFor('destination'), false);
     expect(second.answered).toContain('destination');
     expect(second.retries).toBe(0);
   });
@@ -141,11 +141,11 @@ describe('advance', () => {
   it('gives a required step one re-ask and then moves on rather than deadlocking', () => {
     const asked = briefWith({ destination: 'Lisbon', answered: ['destination', 'origin'] });
 
-    const first = advance(asked, stepFor('dates'), false);
+    const first = advanceFlow(asked, stepFor('dates'), false);
     expect(first.answered).not.toContain('dates');
     expect(first.retries).toBe(1);
 
-    const second = advance(first, stepFor('dates'), false);
+    const second = advanceFlow(first, stepFor('dates'), false);
     expect(second.answered).toContain('dates');
   });
 
@@ -154,7 +154,7 @@ describe('advance', () => {
 
     // Without the reset the next required step would inherit an exhausted budget and
     // be skipped without ever being asked.
-    expect(advance(stalled, stepFor('origin'), true).retries).toBe(0);
+    expect(advanceFlow(stalled, stepFor('origin'), true).retries).toBe(0);
   });
 
   it('marks every other step the same reply happened to answer', () => {
@@ -168,7 +168,7 @@ describe('advance', () => {
       travelerType: 'couple',
     });
 
-    const after = advance(all, stepFor('destination'), false);
+    const after = advanceFlow(all, stepFor('destination'), false);
 
     expect(after.answered).toEqual(
       expect.arrayContaining(['destination', 'dates', 'budget', 'interests', 'travelers']),
@@ -223,7 +223,7 @@ describe('rejecting an unreadable reply', () => {
     // would leave the last question unable to refuse anything at all.
     const spent = briefWith({ destination: 'Lisbon', rejections: MAX_REJECTIONS });
 
-    const after = advance(spent, stepFor('destination'), false);
+    const after = advanceFlow(spent, stepFor('destination'), false);
 
     expect(after.rejections).toBe(0);
     expect(canReject(after)).toBe(true);
@@ -234,7 +234,7 @@ describe('rejecting an unreadable reply', () => {
     // question, which says nothing about whether their next attempt will be readable.
     const stalled = briefWith({ rejections: 1 });
 
-    const after = advance(stalled, stepFor('destination'), false);
+    const after = advanceFlow(stalled, stepFor('destination'), false);
 
     expect(after.answered).not.toContain('destination');
     expect(after.retries).toBe(1);

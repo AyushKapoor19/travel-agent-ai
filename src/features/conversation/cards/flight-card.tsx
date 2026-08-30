@@ -1,5 +1,5 @@
 import type { FareInsight, FlightFare } from '@/features/travel/types';
-import { cn } from '@/lib/cn';
+import { classNames } from '@/lib/class-names';
 import { formatDateRange, formatPrice, formatShortDate } from '@/lib/format';
 import { MINUTES_PER_HOUR } from '@/lib/time';
 
@@ -115,7 +115,7 @@ function FareScaleStrip({ scale }: { scale: FareScale }) {
       {scale.marks.map((left, index) => (
         <span
           key={index}
-          className={cn(
+          className={classNames(
             'absolute w-[2px] -translate-x-1/2 rounded-full',
             index === 0 ? 'inset-y-0 bg-ink' : 'top-1/2 h-1.5 -translate-y-1/2 bg-ink/30',
           )}
@@ -190,7 +190,7 @@ export function FlightCard({
             {/* The cheapest carries the ink, so the answer to "what does this cost" is
                 one figure and the other two are the context for it. */}
             <p
-              className={cn(
+              className={classNames(
                 'figure ml-auto shrink-0 text-[0.8125rem]',
                 index === 0 ? 'text-ink' : 'text-ink-soft',
               )}
@@ -207,7 +207,7 @@ export function FlightCard({
         {scale && <FareScaleStrip scale={scale} />}
 
         <div
-          className={cn(
+          className={classNames(
             'flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1',
             scale && 'mt-2.5',
           )}

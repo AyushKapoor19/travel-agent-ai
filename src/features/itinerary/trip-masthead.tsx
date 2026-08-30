@@ -10,7 +10,7 @@ import { usePlaceImage } from '@/features/photos/use-place-image';
 import type { TripBrief } from '@/features/trip/brief';
 import { tripNights } from '@/features/trip/brief';
 import { tripStub } from '@/features/trip/stub';
-import { ease } from '@/lib/design/motion';
+import { easeTransition } from '@/lib/design/motion';
 
 /** The document is capped at this width, so the cover never needs more. */
 const COVER_SIZES = '(max-width: 768px) 100vw, 768px';
@@ -76,7 +76,7 @@ export function TripMasthead({ brief }: TripMastheadProps) {
         <motion.figure
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
-          transition={ease(COVER_FADE_SECONDS)}
+          transition={easeTransition(COVER_FADE_SECONDS)}
           className="relative mb-8 h-48 w-full overflow-hidden rounded-[var(--radius-glass-sm)] sm:h-72"
         >
           <PlacePhoto

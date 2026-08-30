@@ -1,4 +1,4 @@
-import { cn } from '@/lib/cn';
+import { classNames } from '@/lib/class-names';
 
 type OrbProps = {
   /** Rendered size in pixels. */
@@ -49,7 +49,7 @@ export function Orb({ size = DEFAULT_SIZE_PX, className, active = false }: OrbPr
   return (
     <div
       aria-hidden
-      className={cn('relative shrink-0', className)}
+      className={classNames('relative shrink-0', className)}
       style={{ width: size, height: size }}
     >
       <div

@@ -5,7 +5,7 @@ import { useEffect, useState } from 'react';
 import { PhotoCreditLink } from '@/features/photos/photo-credit-link';
 import { PlacePhoto } from '@/features/photos/place-photo';
 import { usePlaceImages } from '@/features/photos/use-place-image';
-import { cn } from '@/lib/cn';
+import { classNames } from '@/lib/class-names';
 import { gradientCss } from '@/lib/design/gradient';
 
 import { DESTINATION_QUERIES, FEATURED_DESTINATIONS } from './featured-destinations';
@@ -163,7 +163,7 @@ export function DestinationIndex({ live, className }: DestinationIndexProps) {
       onMouseLeave={() => setHovered(false)}
       onFocus={() => setFocused(true)}
       onBlur={() => setFocused(false)}
-      className={cn(
+      className={classNames(
         'grid gap-[clamp(1.25rem,2.5vw,3rem)] xl:grid-cols-[minmax(0,1fr)_clamp(15rem,19vw,21rem)]',
         className,
       )}
@@ -247,7 +247,7 @@ export function DestinationIndex({ live, className }: DestinationIndexProps) {
                 alt=""
                 fill
                 sizes={PREVIEW_SIZES}
-                className={cn(
+                className={classNames(
                   'object-cover transition-opacity duration-700 ease-wayfare',
                   index === active ? 'opacity-100' : 'opacity-0',
                 )}

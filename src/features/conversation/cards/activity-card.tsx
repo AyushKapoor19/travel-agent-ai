@@ -1,6 +1,6 @@
 import type { ActivityResult } from '@/features/travel/types';
 import { formatCount, formatPrice } from '@/lib/format';
-import { nameKey } from '@/lib/name-key';
+import { placeNameKey } from '@/lib/place-name-key';
 
 import { ResultCard } from './result-card';
 
@@ -68,5 +68,5 @@ function photoCaption(activity: ActivityResult): string | undefined {
   const subject = activity.image?.subject;
   if (!subject) return undefined;
 
-  return nameKey(subject) === nameKey(activity.name) ? undefined : NEARBY_CAPTION;
+  return placeNameKey(subject) === placeNameKey(activity.name) ? undefined : NEARBY_CAPTION;
 }

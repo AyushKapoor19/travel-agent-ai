@@ -5,7 +5,7 @@ import { motion } from 'motion/react';
 import type { DestinationSuggestion, ReasonKind } from '@/features/travel/types';
 import { SPRING, stagger } from '@/lib/design/motion';
 import { formatPrice } from '@/lib/format';
-import { nameKey } from '@/lib/name-key';
+import { placeNameKey } from '@/lib/place-name-key';
 
 import { Plate } from './plate';
 
@@ -169,5 +169,5 @@ function photoCaption({ image, city }: DestinationSuggestion): string | undefine
   const subject = image?.subject;
   if (!subject) return undefined;
 
-  return nameKey(subject) === nameKey(city) ? undefined : 'Nearby';
+  return placeNameKey(subject) === placeNameKey(city) ? undefined : 'Nearby';
 }

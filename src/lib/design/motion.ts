@@ -10,7 +10,7 @@ import type { Transition } from 'motion/react';
 export const EASE: [number, number, number, number] = [0.52, 0.01, 0.16, 1];
 
 /** Content settling into place. Long enough to be felt, short enough to skim. */
-export function ease(duration = 0.9, delay = 0): Transition {
+export function easeTransition(duration = 0.9, delay = 0): Transition {
   return { duration, delay, ease: EASE };
 }
 

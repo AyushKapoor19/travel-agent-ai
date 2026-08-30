@@ -5,7 +5,7 @@ import Link from 'next/link';
 import { motion } from 'motion/react';
 import type { MouseEvent, PointerEvent, ReactNode } from 'react';
 
-import { cn } from '@/lib/cn';
+import { classNames } from '@/lib/class-names';
 
 import { useMagneticPull } from './use-magnetic-pull';
 
@@ -67,7 +67,7 @@ export function Magnetic({
       rel={target === '_blank' ? 'noopener noreferrer' : undefined}
       aria-label={label ?? `${text}${accent ?? ''}`}
       style={{ x: pull.x, y: pull.y }}
-      className={cn('inline-flex items-center justify-center', className)}
+      className={classNames('inline-flex items-center justify-center', className)}
       onClick={onClick}
       onPointerMove={track}
       onPointerEnter={(event: PointerEvent<HTMLAnchorElement>) => {
@@ -84,7 +84,7 @@ export function Magnetic({
       <motion.span
         aria-hidden
         style={{ x: drift.x, y: drift.y }}
-        className={cn('inline-block whitespace-nowrap', textClassName)}
+        className={classNames('inline-block whitespace-nowrap', textClassName)}
       >
         {text}
         {accent && <span className="text-accent">{accent}</span>}

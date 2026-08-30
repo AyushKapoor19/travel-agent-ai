@@ -22,7 +22,7 @@ function isTextPart(part: MessagePartLike): part is TextPart {
  * chunks of one sentence, and anything between them would insert spaces into
  * the middle of words.
  */
-export function partsText(parts: ReadonlyArray<MessagePartLike>): string {
+export function textFromParts(parts: ReadonlyArray<MessagePartLike>): string {
   return parts
     .filter(isTextPart)
     .map((part) => part.text)
@@ -30,7 +30,7 @@ export function partsText(parts: ReadonlyArray<MessagePartLike>): string {
 }
 
 export function messageText(message: { readonly parts: ReadonlyArray<MessagePartLike> }): string {
-  return partsText(message.parts);
+  return textFromParts(message.parts);
 }
 
 /**

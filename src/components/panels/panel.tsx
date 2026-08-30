@@ -2,7 +2,7 @@
 
 import type { ReactNode } from 'react';
 
-import { cn } from '@/lib/cn';
+import { classNames } from '@/lib/class-names';
 import { SURFACE, type Tone } from '@/lib/design/tone';
 
 import { usePanels } from './panel-scroller';
@@ -18,8 +18,8 @@ type SeamProps = {
 /** The strip that collapses on arrival, filled with the panel being left. */
 function Seam({ edge, self, neighbour }: SeamProps) {
   return (
-    <div aria-hidden className={cn('seam', `seam--${edge}`, SURFACE[neighbour])}>
-      <div className={cn('seam__dome', SURFACE[self])} />
+    <div aria-hidden className={classNames('seam', `seam--${edge}`, SURFACE[neighbour])}>
+      <div className={classNames('seam__dome', SURFACE[self])} />
     </div>
   );
 }
@@ -58,7 +58,7 @@ export function Panel({ id, tone, above, below, className, children }: PanelProp
       data-panel={id}
       data-tone={tone === 'night' ? 'night' : undefined}
       inert={hidden}
-      className={cn('panel isolate', SURFACE[tone], tone === 'night' && 'grain', className)}
+      className={classNames('panel isolate', SURFACE[tone], tone === 'night' && 'grain', className)}
     >
       {above && <Seam edge="top" self={tone} neighbour={above} />}
       {children}

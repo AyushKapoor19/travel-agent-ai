@@ -2,7 +2,7 @@
 
 import { Markdown } from '@/components/ui/markdown';
 import { RouteWait } from '@/components/ui/route-wait';
-import { partsText } from '@/features/agent/message-text';
+import { textFromParts } from '@/features/agent/message-text';
 import type { WayfareMessagePart } from '@/features/agent/messages';
 import { isBandTitle } from '@/features/conversation/cards/band-titles';
 import { ToolResult } from '@/features/conversation/tool-results';
@@ -43,7 +43,7 @@ type ItineraryDocumentProps = {
  * the days will be.
  */
 export function ItineraryDocument({ brief, parts, writing }: ItineraryDocumentProps) {
-  const { intro, days, notes } = splitItinerary(partsText(parts));
+  const { intro, days, notes } = splitItinerary(textFromParts(parts));
 
   return (
     <article className="space-y-12">

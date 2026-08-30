@@ -35,13 +35,13 @@ const ToolPart = {
 
 type SearchFailedProps = {
   /** What could not be loaded, as it reads mid-sentence: "places to stay". */
-  what: string;
+  subject: string;
 };
 
-function SearchFailed({ what }: SearchFailedProps) {
+function SearchFailed({ subject }: SearchFailedProps) {
   return (
     <AsideNote>
-      Couldn&apos;t load {what} just now. The rest of the plan below is unaffected.
+      Couldn&apos;t load {subject} just now. The rest of the plan below is unaffected.
     </AsideNote>
   );
 }
@@ -96,7 +96,7 @@ function SearchToolView<TOutput>({
       );
 
     case 'output-error':
-      return <SearchFailed what={failureLabel} />;
+      return <SearchFailed subject={failureLabel} />;
 
     default:
       return null;
@@ -161,7 +161,7 @@ export function ToolResult({ part }: ToolResultProps) {
         );
 
       case 'output-error':
-        return <SearchFailed what="the weather" />;
+        return <SearchFailed subject="the weather" />;
 
       default:
         return null;
@@ -192,7 +192,7 @@ export function ToolResult({ part }: ToolResultProps) {
         ) : null;
 
       case 'output-error':
-        return <SearchFailed what="flight fares" />;
+        return <SearchFailed subject="flight fares" />;
 
       default:
         return null;
@@ -214,7 +214,7 @@ export function ToolResult({ part }: ToolResultProps) {
         ) : null;
 
       case 'output-error':
-        return <SearchFailed what="the costs" />;
+        return <SearchFailed subject="the costs" />;
 
       default:
         return null;

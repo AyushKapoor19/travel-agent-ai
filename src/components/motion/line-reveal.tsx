@@ -3,7 +3,7 @@
 import { motion } from 'motion/react';
 import type { ReactNode } from 'react';
 
-import { cn } from '@/lib/cn';
+import { classNames } from '@/lib/class-names';
 import { EASE, STEP } from '@/lib/design/motion';
 
 type LineRevealProps = {
@@ -47,7 +47,7 @@ export function LineReveal({
   const driven = play !== undefined;
 
   return (
-    <span className={cn('block', className)}>
+    <span className={classNames('block', className)}>
       {lines.map((line, index) => {
         const animation = {
           initial: { y: '110%' },
