@@ -1,9 +1,6 @@
-import { classNames } from '@/lib/class-names';
-
 type RouteWaitProps = {
   /** What is being waited for. Read out to assistive technology as well as drawn. */
   label: string;
-  className?: string;
 };
 
 /**
@@ -20,9 +17,9 @@ type RouteWaitProps = {
  * prop rather than a default: "Reading that" and "Pricing the stays" are the
  * difference between a wait that is explained and a spinner.
  */
-export function RouteWait({ label, className }: RouteWaitProps) {
+export function RouteWait({ label }: RouteWaitProps) {
   return (
-    <div className={classNames('flex items-center gap-4', className)} role="status">
+    <div className="flex items-center gap-4" role="status">
       <span className="label shrink-0 text-ink-muted">{label}</span>
       <span aria-hidden className="route-track max-w-40 flex-1">
         <span className="route-mark" />

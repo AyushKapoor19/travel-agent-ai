@@ -31,7 +31,6 @@ type PanelProps = {
   above?: Tone;
   /** Tone of the panel below. Omit for the last one. */
   below?: Tone;
-  className?: string;
   children: ReactNode;
 };
 
@@ -47,7 +46,7 @@ type PanelProps = {
  * without this a tab press would send focus into it — at which point the browser
  * tries to scroll it into view and fights the track for control of the page.
  */
-export function Panel({ id, tone, above, below, className, children }: PanelProps) {
+export function Panel({ id, tone, above, below, children }: PanelProps) {
   const { panels, index, engaged } = usePanels();
   const own = panels.findIndex((panel) => panel.id === id);
   const hidden = engaged && own >= 0 && own !== index;
@@ -58,7 +57,7 @@ export function Panel({ id, tone, above, below, className, children }: PanelProp
       data-panel={id}
       data-tone={tone === 'night' ? 'night' : undefined}
       inert={hidden}
-      className={classNames('panel isolate', SURFACE[tone], tone === 'night' && 'grain', className)}
+      className={classNames('panel isolate', SURFACE[tone], tone === 'night' && 'grain')}
     >
       {above && <Seam edge="top" self={tone} neighbour={above} />}
       {children}

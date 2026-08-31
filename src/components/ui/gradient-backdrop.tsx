@@ -1,5 +1,3 @@
-import { SpecularDefs } from './specular';
-
 /**
  * The page's base coat, behind everything and visible wherever a section does
  * not paint its own surface — which in practice means the chat.
@@ -30,8 +28,6 @@ export function GradientBackdrop() {
       {/* Washes the top and bottom back towards paper so text on glass stays
           legible wherever a blob drifts. */}
       <div className="absolute inset-0 bg-gradient-to-b from-white/75 via-white/25 to-white/85" />
-
-      <SpecularDefs />
     </div>
   );
 }

@@ -209,16 +209,19 @@ Either the brief says no destination was chosen, or it names a region rather tha
  * result, which came back as three fares, a cost breakdown and a budget summary written
  * out in prose directly above the band drawing all three.
  *
- * The instruction to write all the days rather than the one that changed is not a style
- * preference. The document is drawn from the newest reply that wrote days, so a reply
- * containing only "## Day 3" is a plan with one day in it, and it would take the place
- * of the week.
+ * Writing only the days that changed is a requirement of the screen rather than a matter
+ * of taste. The plan is a document that is delivered once and then stays put, and
+ * everything after it is written underneath in the order it was asked for — so a reply
+ * that repeats all seven days prints the trip a second time a screen below the first,
+ * and the traveller has two itineraries and no way to tell which one is live.
  */
-const ADJUSTMENT_RULES = `If the trip has already been written and this turn only adds to it or asks about it:
-- Do not write the itinerary again. Answer what they asked in two or three sentences and stop.
-- Whatever you searched is already drawn under the plan, each set under its own heading. Never list the fares, the rates, the entry prices or the arithmetic back to them — say what the result means for this trip, which is the one thing the results cannot say for themselves.
+const ADJUSTMENT_RULES = `If the trip has already been written, this turn adds to it. The plan is still on the page above whatever you write now, and so is everything either of you has said since, so write only what is new:
+- If they asked a question about the trip, answer it in two or three sentences and stop. No headings and no days.
+- Whatever you searched is drawn under your reply, each set under its own heading. Never list the fares, the rates, the entry prices or the arithmetic back to them — say what the result means for this trip, which is the one thing the results cannot say for themselves.
 - If it changes what you would recommend, say so in a line: which stay, which day, what to book first.
-- Rewrite the days only when the trip itself has changed — a different city, different dates, a day reordered. When it has, write the whole itinerary again from the opening paragraph, not just the part that moved.`;
+- If they changed something about the trip — a day swapped, a stop added, an activity dropped — open with one line saying what moved, then write only the days that actually changed, each under its own "## Day N:" heading keeping the number it already has in the plan. Leave every unchanged day out. They are still on the page, and writing them again prints the trip twice.
+- A change that genuinely moves every day, such as a different city or different dates, is the case where all of them changed: write them all, and say in the opening line that this replaces the plan above.
+- Write the whole itinerary out again only when they ask you to — "show me the full plan", "put it all together". It is a request you answer, never something you do on your own because a lot has changed.`;
 
 /**
  * The payoff turn: the brief is complete, so search for real options and write

@@ -1,9 +1,6 @@
-import { classNames } from '@/lib/class-names';
-
 type OrbProps = {
   /** Rendered size in pixels. */
   size?: number;
-  className?: string;
   /** Tightens the pulse while the agent is working. */
   active?: boolean;
 };
@@ -43,15 +40,11 @@ const BOUNCE_OPACITY = 0.4;
  * sphere's tones come from the tone tokens, so the same component is obsidian
  * on paper and moonstone on night without a prop.
  */
-export function Orb({ size = DEFAULT_SIZE_PX, className, active = false }: OrbProps) {
+export function Orb({ size = DEFAULT_SIZE_PX, active = false }: OrbProps) {
   const animationDuration = active ? PULSE_ACTIVE : PULSE_IDLE;
 
   return (
-    <div
-      aria-hidden
-      className={classNames('relative shrink-0', className)}
-      style={{ width: size, height: size }}
-    >
+    <div aria-hidden className="relative shrink-0" style={{ width: size, height: size }}>
       <div
         className="animate-orb-halo absolute inset-0 rounded-full blur-lg"
         style={{ background: Layer.HALO, animationDuration }}

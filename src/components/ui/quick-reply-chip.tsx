@@ -9,7 +9,6 @@ type QuickReplyChipProps = {
   label: string;
   onClick: () => void;
   selected?: boolean;
-  disabled?: boolean;
   /** Position in the row revealed together, which sets the chip's turn. */
   index?: number;
 };
@@ -30,23 +29,20 @@ export function QuickReplyChip({
   label,
   onClick,
   selected = false,
-  disabled = false,
   index = 0,
 }: QuickReplyChipProps) {
   return (
     <motion.button
       type="button"
       onClick={onClick}
-      disabled={disabled}
       aria-pressed={selected}
       initial={{ opacity: 0, y: RISE_PX }}
       animate={{ opacity: 1, y: 0 }}
       transition={easeTransition(REVEAL_SECONDS, stagger(index))}
-      whileTap={disabled ? undefined : { scale: TAP_SCALE }}
+      whileTap={{ scale: TAP_SCALE }}
       className={classNames(
         'rounded-full border px-3.5 py-1.5 text-[0.8125rem] tracking-[-0.01em]',
         selected ? 'chip-selected' : 'btn-ghost',
-        disabled && 'cursor-not-allowed opacity-40',
       )}
     >
       {label}

@@ -1,18 +1,8 @@
 import type { ActivityResult } from '@/features/travel/types';
 import { formatCount, formatPrice } from '@/lib/format';
-import { placeNameKey } from '@/lib/place-name-key';
 
+import { photoCaption } from './photo-caption';
 import { ResultCard } from './result-card';
-
-/**
- * Said when the photograph is of somewhere else in the same city.
- *
- * Wikipedia has an article for Tanah Lot and none for a neighbourhood
- * restaurant, so the lookup falls back to a nearby landmark — a card for "A Nossa
- * Casa" came back illustrated with Lisbon Cathedral. The photo is still worth
- * showing and the caption is what stops it being a claim.
- */
-const NEARBY_CAPTION = 'Nearby';
 
 type ActivityCardProps = {
   activity: ActivityResult;
@@ -31,7 +21,7 @@ export function ActivityCard({ activity, index }: ActivityCardProps) {
       meta={metaLine(activity)}
       description={activity.description ?? ''}
       image={activity.image}
-      photoNote={photoCaption(activity)}
+      photoNote={photoCaption(activity.image, activity.name)}
       price={priceLine(activity)}
       bookingUrl={activity.bookingUrl}
       provider={activity.provider}
@@ -61,12 +51,4 @@ function metaLine(activity: ActivityResult): string {
  */
 function priceLine(activity: ActivityResult): string | null {
   return activity.priceLabel ?? formatPrice(activity.price, activity.currency);
-}
-
-/** Undefined when the photo is of the place itself, which needs no qualifying. */
-function photoCaption(activity: ActivityResult): string | undefined {
-  const subject = activity.image?.subject;
-  if (!subject) return undefined;
-
-  return placeNameKey(subject) === placeNameKey(activity.name) ? undefined : NEARBY_CAPTION;
 }

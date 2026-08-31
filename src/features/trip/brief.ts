@@ -5,7 +5,7 @@ import { formatPrice } from '@/lib/format';
 import { nightsBetween } from '@/lib/time';
 
 /** Every provider here quotes USD, so a stated ceiling is read as USD too. */
-const BUDGET_CURRENCY = 'USD';
+export const BUDGET_CURRENCY = 'USD';
 
 /**
  * The guided conversation's vocabulary and state.
@@ -61,7 +61,7 @@ export const BriefLimits = {
   MAX_BUDGET_USD: 1_000_000,
 } as const;
 
-const DEFAULT_TRAVELERS = 2;
+export const DEFAULT_TRAVELERS = 2;
 const DEFAULT_PACE = 'balanced';
 
 /** An enum field that is also allowed to be unanswered. */

@@ -2,14 +2,14 @@ import 'server-only';
 
 import { z } from 'zod';
 
-import { imageProvider } from '@/features/photos/server';
-import { cacheKey, createTtlCache } from '@/features/serpapi/cache';
+import { cachedList, cacheKey, createTtlCache } from '@/features/serpapi/cache';
 import { serpApiSearch } from '@/features/serpapi/client';
 import { SerpApiEngine } from '@/features/serpapi/constants';
 import { numericField } from '@/features/serpapi/schema';
 import { placeNameKey } from '@/lib/place-name-key';
 
 import { activitySearchUrl, BookingProvider } from './booking-links';
+import { withPlaceImages } from './place-images';
 import type { ActivityProvider, ActivityQuery, ActivityResult } from './types';
 
 /**
@@ -172,11 +172,10 @@ function searchQuery(
 }
 
 /**
- * Drafts rather than finished results, because the search is metered by SerpApi
- * and worth remembering while the photographs are decoration a caller may not
- * want. The destination shortlist reads this for sight names alone, and enriching
- * what it asked for cost forty Wikipedia lookups nobody would ever see — enough to
- * be rate-limited out of the three that mattered.
+ * Drafts rather than finished results, for the reason `withPlaceImages` gives. The
+ * destination shortlist reads this for sight names alone, and enriching what it
+ * asked for cost forty Wikipedia lookups nobody would ever see — enough to be
+ * rate-limited out of the three that mattered.
  */
 const activitiesCache = createTtlCache<Draft[]>();
 
@@ -258,36 +257,17 @@ const serpApiActivityProvider: ActivityProvider = {
     const limit = Math.min(query.limit ?? DEFAULT_LIMIT, CANDIDATE_CEILING);
     const key = cacheKey('activities', destination, query.country, query.category, limit);
 
-    const cached = activitiesCache.read(key);
+    const drafts = await cachedList(activitiesCache, key, () =>
+      buildActivities(destination, query.country, query.category, limit),
+    );
 
-    // A transient failure is deliberately not cached: it would leave a
-    // destination with nothing to do for the rest of the hour.
-    const drafts = cached
-      ? (cached.value ?? [])
-      : await buildActivities(destination, query.country, query.category, limit);
-
-    if (!cached) activitiesCache.write(key, drafts.length > 0 ? drafts : null);
     if (drafts.length === 0) return [];
 
     return query.withImages === false
       ? drafts.map((draft) => toResult(draft, destination, null))
-      : withImages(drafts, destination);
+      : withPlaceImages(drafts, destination, (draft, image) => toResult(draft, destination, image));
   },
 };
-
-/** Batched into one round trip: the image provider paces its outbound calls. */
-async function withImages(
-  drafts: readonly Draft[],
-  destination: string,
-): Promise<ActivityResult[]> {
-  const images = await imageProvider().lookup(
-    drafts.map((draft) => imageQuery(draft.name, destination)),
-  );
-
-  return drafts.map((draft) =>
-    toResult(draft, destination, images.get(imageQuery(draft.name, destination)) ?? null),
-  );
-}
 
 /** One activity as the two engines jointly describe it, before a photo is attached. */
 type Draft = {
@@ -398,11 +378,6 @@ function toResult(
     provider: BookingProvider.ACTIVITIES,
     image,
   };
-}
-
-/** Scoped to the destination, so "Central Market" is not looked up in the wrong city. */
-function imageQuery(name: string, destination: string): string {
-  return `${name} ${destination}`;
 }
 
 /**

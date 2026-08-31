@@ -5,9 +5,9 @@ questions, then searches real hotels, flights and activities and gives you a day
 
 **Live:** [travel-agent-ai-three.vercel.app](https://travel-agent-ai-three.vercel.app/)
 
-The deployment runs on the free tiers of both APIs — Gemini allows 20 requests a day and a single
-planning turn spends several — so a shared link will run out of quota long before it runs out of
-interest. Run it locally with your own keys to see it work end to end.
+> **Note:** the SerpApi key behind the deployment is almost out of searches. Once it runs dry, stays,
+> flights and activities come back empty and the plan is built without them. Run it locally with your
+> own keys to see it work end to end.
 
 ## Getting started
 

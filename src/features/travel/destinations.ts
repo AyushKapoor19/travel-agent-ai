@@ -18,6 +18,7 @@ import { nightsBetween } from '@/lib/time';
 
 import { activityProvider } from './activities';
 import { hotelProvider } from './hotels';
+import { quotedCheapestFirst } from './rates';
 import type {
   BudgetLevel,
   DestinationCandidate,
@@ -213,10 +214,7 @@ function budgetScore(nightlyUsd: number, budgetLevel: BudgetLevel): number {
  * fabrication assembled out of true parts.
  */
 function costFrom(hotels: readonly HotelResult[], nights: number | null) {
-  const quoted = hotels
-    .filter((hotel) => hotel.pricePerNight !== null && hotel.pricePerNight > 0)
-    .sort((a, b) => (a.pricePerNight ?? 0) - (b.pricePerNight ?? 0));
-
+  const quoted = quotedCheapestFirst(hotels);
   const cheapest = quoted[0];
   if (!cheapest?.pricePerNight) return null;
 

@@ -1,7 +1,7 @@
 import type { HotelResult } from '@/features/travel/types';
 import { formatCount, formatPrice, formatStars } from '@/lib/format';
-import { placeNameKey } from '@/lib/place-name-key';
 
+import { photoCaption } from './photo-caption';
 import { ResultCard } from './result-card';
 
 const PRICE_UNIT = '/ night';
@@ -15,9 +15,6 @@ const PRICE_UNIT = '/ night';
 function priceUnitFor(rooms: number): string {
   return rooms > 1 ? `${PRICE_UNIT}, ${rooms} rooms` : PRICE_UNIT;
 }
-
-/** Said when the photograph is of somewhere else in the same city. */
-const NEARBY_CAPTION = 'Nearby';
 
 type HotelCardProps = {
   hotel: HotelResult;
@@ -42,7 +39,7 @@ export function HotelCard({ hotel, index }: HotelCardProps) {
       meta={metaLine(hotel)}
       description={hotel.description ?? ''}
       image={hotel.image}
-      photoNote={photoCaption(hotel)}
+      photoNote={photoCaption(hotel.image, hotel.name)}
       price={formatPrice(hotel.pricePerNight, hotel.currency)}
       priceUnit={priceUnitFor(hotel.rooms)}
       note={hotel.amenities.join(' · ') || undefined}
@@ -63,12 +60,4 @@ function metaLine(hotel: HotelResult): string {
   ];
 
   return parts.filter(Boolean).join(' · ');
-}
-
-/** Undefined when the photo is of the property itself, which needs no qualifying. */
-function photoCaption(hotel: HotelResult): string | undefined {
-  const subject = hotel.image?.subject;
-  if (!subject) return undefined;
-
-  return placeNameKey(subject) === placeNameKey(hotel.name) ? undefined : NEARBY_CAPTION;
 }

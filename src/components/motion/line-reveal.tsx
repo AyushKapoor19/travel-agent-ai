@@ -3,7 +3,6 @@
 import { motion } from 'motion/react';
 import type { ReactNode } from 'react';
 
-import { classNames } from '@/lib/class-names';
 import { EASE, STEP } from '@/lib/design/motion';
 
 type LineRevealProps = {
@@ -21,7 +20,6 @@ type LineRevealProps = {
    */
   play?: boolean;
   delay?: number;
-  className?: string;
 };
 
 /**
@@ -37,17 +35,11 @@ type LineRevealProps = {
  * Under `prefers-reduced-motion` the provider drops transforms entirely, so
  * the lines are simply in place from the first frame.
  */
-export function LineReveal({
-  lines,
-  immediate = false,
-  play,
-  delay = 0,
-  className,
-}: LineRevealProps) {
+export function LineReveal({ lines, immediate = false, play, delay = 0 }: LineRevealProps) {
   const driven = play !== undefined;
 
   return (
-    <span className={classNames('block', className)}>
+    <span className="block">
       {lines.map((line, index) => {
         const animation = {
           initial: { y: '110%' },

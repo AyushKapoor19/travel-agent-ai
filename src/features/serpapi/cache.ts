@@ -58,6 +58,29 @@ export function createTtlCache<T>(): TtlCache<T> {
 }
 
 /**
+ * The remembered answer, or a fresh one remembered on the way out.
+ *
+ * Every provider here wants the same three-step dance and got it slightly wrong in
+ * slightly different words: a hit means the entry, even a cached miss, so an empty
+ * hit must not trigger another paid search; and a build that throws must not be
+ * written at all, or a rate limit leaves a destination with nothing to do for the
+ * rest of the hour. Both of those are one-line mistakes to make twice.
+ */
+export async function cachedList<T>(
+  cache: TtlCache<T[]>,
+  key: string,
+  build: () => Promise<T[]>,
+): Promise<T[]> {
+  const entry = cache.read(key);
+  if (entry) return entry.value ?? [];
+
+  const built = await build();
+  cache.write(key, built.length > 0 ? built : null);
+
+  return built;
+}
+
+/**
  * A cache key from the parts that change the answer.
  *
  * Lower-cased and trimmed so "Bali" and "bali " are one destination, and

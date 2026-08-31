@@ -59,15 +59,12 @@
   --surface: linear-gradient(90deg, #ffffff 0%, #f2f2f0 100%);
 
   --glass-fill: rgb(255 255 255 / 0.62);
-  --glass-fill-strong: rgb(255 255 255 / 0.86);
   --glass-fill-opaque: rgb(250 250 249 / 0.97);
-  --glass-hover: rgb(255 255 255 / 0.96);
   --glass-rim: rgb(255 255 255 / 0.9);
   --glass-edge: rgb(14 13 12 / 0.1);
   --glass-shadow: 0 20px 48px -22px rgb(14 13 12 / 0.24);
   --glass-sheen-top: rgb(255 255 255 / 0.55);
   --glass-sheen-bottom: rgb(14 13 12 / 0.05);
-  --glass-user: rgb(14 13 12 / 0.07);
   --glass-blur: 22px;
 
   /* Primary action: maximum contrast against the surface it sits on, which
@@ -114,15 +111,12 @@
   /* On black the panel is defined by what it lets through, so the fill drops
      to a film and the rim carries the edge. */
   --glass-fill: rgb(255 255 255 / 0.05);
-  --glass-fill-strong: rgb(255 255 255 / 0.09);
   --glass-fill-opaque: rgb(31 31 29 / 0.97);
-  --glass-hover: rgb(255 255 255 / 0.13);
   --glass-rim: rgb(255 255 255 / 0.18);
   --glass-edge: rgb(255 255 255 / 0.1);
   --glass-shadow: 0 28px 64px -28px rgb(0 0 0 / 0.85);
   --glass-sheen-top: rgb(255 255 255 / 0.14);
   --glass-sheen-bottom: rgb(0 0 0 / 0.2);
-  --glass-user: rgb(255 255 255 / 0.11);
 
   --btn-bg: #f6f5f2;
   --btn-fg: #0e0d0c;
@@ -376,14 +370,6 @@
     letter-spacing: -0.011em;
   }
 
-  /* Fades the tail of a long line instead of letting it collide with whatever
-     sits beside it. */
-  .mask-r {
-    --mask: linear-gradient(90deg, #000 0%, #000 72%, transparent 100%);
-    -webkit-mask-image: var(--mask);
-    mask-image: var(--mask);
-  }
-
   /* ------------------------------------------------------------------------
      Actions
      ------------------------------------------------------------------------ */
@@ -401,38 +387,6 @@
   .btn-primary:disabled {
     cursor: not-allowed;
     opacity: 0.35;
-  }
-
-  /* The composer's submit, and the only accent fill on the landing page. It is
-     the same yellow as the question mark in the headline above it, so pressing
-     it answers the question that mark asks.
-
-     Dulled rather than greyed out while the field is empty. Grey reads as "you
-     cannot"; a muted version of the same yellow reads as "not yet", which is
-     the honest state — nothing is wrong with the button, the sentence just is
-     not written. Mixed against `--ink-muted` rather than a fixed colour so the
-     dull end darkens on paper and lightens on night, keeping its distance from
-     whatever it is sitting on. */
-  .btn-accent {
-    background-color: color-mix(in oklab, var(--accent) 55%, var(--ink-muted));
-    /* Fixed dark, not `--btn-fg`: the label sits on yellow in either tone, and
-       yellow only ever takes dark text. */
-    color: var(--color-night);
-    transition: background-color 260ms var(--ease-wayfare);
-  }
-
-  /* Armed, which is not the same as enabled — it stays lit through the hand-off,
-     when the button is disabled because the trip is already opening. */
-  .btn-accent[data-armed] {
-    background-color: var(--accent);
-  }
-
-  .btn-accent[data-armed]:hover:not(:disabled) {
-    background-color: color-mix(in oklab, var(--accent) 88%, #ffffff);
-  }
-
-  .btn-accent:disabled:not([data-armed]) {
-    cursor: not-allowed;
   }
 
   /* Hairline pill. The whole secondary action vocabulary is one border. */
@@ -654,14 +608,9 @@
 
   /* Without backdrop-filter there is nothing to see through, so go opaque. */
   @supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
-    .glass-blur,
-    .glass-strong {
+    .glass-blur {
       background: var(--glass-fill-opaque);
     }
-  }
-
-  .glass-strong {
-    background: var(--glass-fill-strong);
   }
 
   /* Gloss on the top edge, measured in absolute lengths rather than
@@ -681,22 +630,6 @@
       ),
       linear-gradient(to top, var(--glass-sheen-bottom) 0, transparent 3rem);
     pointer-events: none;
-  }
-
-  /* The traveller's own messages. */
-  .glass-user {
-    background: var(--glass-user);
-  }
-
-  /* Hover lift. A `bg-white/…` utility would replace the fill outright, so the
-     transition stays on this class where the fill is defined. */
-  .glass-hover {
-    transition: background-color 300ms var(--ease-wayfare);
-  }
-
-  .glass-hover:hover,
-  .glass-hover:focus-within {
-    background: var(--glass-hover);
   }
 
   /* ------------------------------------------------------------------------

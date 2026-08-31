@@ -44,8 +44,7 @@ export type Stage =
   | {
       kind: typeof StageKind.PLAN;
       /**
-       * Everything the document draws: the reply that wrote the plan, plus the tool
-       * results of anything asked since.
+       * What the document draws: the reply that wrote the plan, and only that reply.
        *
        * Empty when the planning turn has been sent and nothing has come back yet. The
        * document does not need them to start: the brief is complete by definition on a
@@ -88,43 +87,34 @@ function wroteDays(message: WayfareUIMessage): boolean {
 }
 
 /**
- * The reply the document is drawn from: the newest one at or before the plan that
- * actually wrote days.
+ * The reply the document is drawn from: the *first* one that wrote days, and from then
+ * on that one for good.
  *
- * This is the difference between adding to a trip and replacing it. Asking "what would
- * the flights cost" sends a planning turn that calls a tool and answers in a paragraph,
- * and a paragraph is not an itinerary — but it was recognised as one on the strength of
- * the tool call alone, so it took the document's place and the seven days the traveller
- * had just been given went off the screen. Everything they could ask that touches a
- * provider did this: price it again, find a cheaper room, check the weather.
+ * The document is the plan as it was delivered, and it is permanent. It used to be the
+ * newest reply with days in it, which made every change to the trip destructive — a
+ * traveller who asked for Osaka instead got the Osaka days in place of the Tokyo ones
+ * and lost the conversation that had produced them, because everything before the
+ * document is off the screen by construction. What replaced it is append-only: the plan
+ * stays where it was and every change to it is written underneath, in the order it was
+ * asked for.
  *
- * Falls back to the plan itself when nothing has written days yet, which is the first
- * planning turn and the shortlist — a shortlist has no days by design.
+ * The fallback is the newest plan rather than the oldest, and only applies while nothing
+ * has written days at all. That is the shortlist — which has no days by design — and the
+ * build that follows it, where the reply still streaming has to take the screen from a
+ * shortlist that is no longer the answer to anything.
  */
-function documentIndex(messages: readonly WayfareUIMessage[], plan: number): number {
-  for (let index = plan; index >= 0; index -= 1) {
+function documentIndex(messages: readonly WayfareUIMessage[]): number {
+  for (let index = 0; index < messages.length; index += 1) {
     const message = messages[index];
     if (message && wroteDays(message)) return index;
   }
 
-  return plan;
-}
+  for (let index = messages.length - 1; index >= 0; index -= 1) {
+    const message = messages[index];
+    if (message && isPlan(message)) return index;
+  }
 
-/**
- * The tool results of every reply after the document, which join it as bands.
- *
- * Only the tool parts, because the prose of a follow-up belongs to the conversation
- * about the plan rather than to the plan: it is an answer to what they just asked, and
- * read into the document it would print as a second opening paragraph.
- *
- * The bands themselves are deduplicated downstream, so a second total supersedes the
- * first in place rather than printing two totals a screen apart.
- */
-function bandsAfter(messages: readonly WayfareUIMessage[], document: number): WayfareMessagePart[] {
-  return messages
-    .slice(document + 1)
-    .filter((message) => message.role === 'assistant')
-    .flatMap((message) => message.parts.filter((part) => isToolUIPart(part)));
+  return -1;
 }
 
 /** The index of the last assistant message, or -1. */
@@ -138,25 +128,22 @@ function newestAssistant(messages: readonly WayfareUIMessage[]): number {
 /**
  * Reads the whole conversation as one of the two screens.
  *
- * Searches from the end, so a traveller who asks for a different city gets the new
- * itinerary as the document and the old one as part of the conversation about it,
- * rather than two documents stacked up. A new itinerary takes over once it has written
- * a day; until then the plan on screen is still the one they can read.
+ * Nothing that has been on this screen ever leaves it. The plan is the document and
+ * everything after it — the questions, the answers, the fares looked up since, a day
+ * rewritten because they wanted the museum on Thursday — is the conversation below it,
+ * in the order it happened.
  *
  * The phase is only reached when nothing in the transcript is a plan yet, which is
  * exactly the case it exists for: the first planning turn, where the layout has to
  * change before there is any content to change it on.
  */
 export function readStage(messages: readonly WayfareUIMessage[], planning: boolean): Stage {
-  for (let index = messages.length - 1; index >= 0; index -= 1) {
-    const message = messages[index];
-    if (!message || !isPlan(message)) continue;
+  const document = documentIndex(messages);
 
-    const document = documentIndex(messages, index);
-
+  if (document >= 0) {
     return {
       kind: StageKind.PLAN,
-      parts: [...(messages[document]?.parts ?? []), ...bandsAfter(messages, document)],
+      parts: messages[document]?.parts ?? [],
       followUps: messages.slice(document + 1),
     };
   }

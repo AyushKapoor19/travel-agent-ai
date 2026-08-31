@@ -2,10 +2,7 @@ import type { RailField, RailTone } from '@/components/ui/field-rail';
 import { formatDateRange, formatPrice } from '@/lib/format';
 
 import type { StepId, TripBrief } from './brief';
-import { STEP_IDS } from './brief';
-
-/** Every provider here quotes USD, so a stated ceiling is read as USD too. */
-const BUDGET_CURRENCY = 'USD';
+import { BUDGET_CURRENCY, DEFAULT_TRAVELERS, STEP_IDS } from './brief';
 
 /** What a field with nothing in it prints. */
 const BLANK = '—';
@@ -80,8 +77,6 @@ const SETTLED: Record<StepId, string> = {
  * `travelers: 2` from the moment it is created, and a cell announcing "solo · 2" is
  * the document contradicting itself.
  */
-const DEFAULT_TRAVELERS = 2;
-
 function partyValue(brief: TripBrief): string {
   if (!brief.travelerType) return '';
   if (brief.travelers === DEFAULT_TRAVELERS) return brief.travelerType;

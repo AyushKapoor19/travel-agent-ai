@@ -16,7 +16,6 @@ type SiteHeaderProps = {
   rule?: boolean;
   /** The right-hand end of the row — the counter, the way out of a conversation. */
   children?: ReactNode;
-  className?: string;
 };
 
 /**
@@ -34,7 +33,7 @@ type SiteHeaderProps = {
  * hangs off the right of it and whether it is ruled off, and neither of those moves the
  * name.
  */
-export function SiteHeader({ active = false, rule = false, children, className }: SiteHeaderProps) {
+export function SiteHeader({ active = false, rule = false, children }: SiteHeaderProps) {
   return (
     <header
       className={classNames(
@@ -43,7 +42,6 @@ export function SiteHeader({ active = false, rule = false, children, className }
         // page's gutter, so the wordmark is in the corner of the page rather than in
         // the corner of the column below it.
         rule && 'border-b border-line',
-        className,
       )}
     >
       <div className="shell flex items-center justify-between gap-4 pb-3.5 pt-[calc(0.875rem+env(safe-area-inset-top,0px))]">

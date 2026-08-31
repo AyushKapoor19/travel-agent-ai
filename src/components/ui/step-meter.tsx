@@ -2,14 +2,12 @@
 
 import { AnimatePresence, motion } from 'motion/react';
 
-import { classNames } from '@/lib/class-names';
 import { easeTransition } from '@/lib/design/motion';
 
 type StepMeterProps = {
   /** Zero-based position of the question being asked. */
   index: number;
   total: number;
-  className?: string;
 };
 
 /** Two digits, so the counter does not change width between the ninth and tenth. */
@@ -37,11 +35,11 @@ function pad(value: number): string {
 const COUNT_RISE_PX = 8;
 const COUNT_SECONDS = 0.34;
 
-export function StepMeter({ index, total, className }: StepMeterProps) {
+export function StepMeter({ index, total }: StepMeterProps) {
   const position = Math.min(index + 1, total);
 
   return (
-    <p className={classNames('figure text-[0.8125rem] text-ink-muted', className)}>
+    <p className="figure text-[0.8125rem] text-ink-muted">
       {/* Fixed to the width of the figure it holds, so the slash does not step sideways
           as the number is handed over. */}
       <span className="relative inline-block w-[2ch] overflow-hidden text-ink align-bottom">

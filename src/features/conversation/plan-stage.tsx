@@ -56,17 +56,22 @@ export function PlanStage({ conversation, parts, followUps }: PlanStageProps) {
    *
    * The gap this closes is the whole of the reported bug. The thread used to be
    * handed `awaitingReply`, which is only true while the request is `submitted` —
-   * so the wait vanished the instant the response *started*, and a turn that opens
-   * with a tool call spends its first several seconds streaming nothing but the
-   * call itself. The traveller was left with their own question, an empty page
-   * under it and a Stop button, which reads as a hang rather than as work.
+   * so the wait vanished the instant the response *started*, and the traveller was
+   * left with their own question, an empty page under it and a Stop button, which
+   * reads as a hang rather than as work.
    *
    * Derived from the tail of the thread rather than from the status, because that
-   * is the thing actually being looked at: their message still the last one means
-   * nothing has come back, and a reply with no text in it has come back empty so
-   * far. Both are waits; only the first was being drawn.
+   * is the thing actually being looked at: their message still being the last one
+   * means nothing has come back.
+   *
+   * Any part at all ends the wait, text or not. A turn that opens with a tool call
+   * spends its first several seconds streaming nothing but the call, and that used
+   * to count as empty — because the call was drawn up in the document, beside the
+   * stays, rather than under the question that asked for it. It is drawn here now,
+   * so the skeleton is the wait, and a route spinning directly above it is the same
+   * wait twice.
    */
-  const answering = busy && count > 0 && (tail?.role !== 'assistant' || tailLength === 0);
+  const answering = busy && count > 0 && (tail?.role !== 'assistant' || tail.parts.length === 0);
 
   useEffect(() => {
     const element = region.current;
@@ -102,7 +107,11 @@ export function PlanStage({ conversation, parts, followUps }: PlanStageProps) {
       <div ref={region} className="scroll-subtle relative min-h-0 flex-1 overflow-y-auto">
         <div className="measure space-y-14 py-9">
           <ItineraryDocument brief={brief} parts={parts} writing={writing} />
-          <FollowUpThread messages={followUps} awaiting={answering} />
+          <FollowUpThread
+            messages={followUps}
+            destination={brief.destination}
+            awaiting={answering}
+          />
         </div>
       </div>
 

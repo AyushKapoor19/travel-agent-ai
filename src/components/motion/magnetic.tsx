@@ -3,7 +3,7 @@
 import Link from 'next/link';
 
 import { motion } from 'motion/react';
-import type { MouseEvent, PointerEvent, ReactNode } from 'react';
+import type { MouseEvent, PointerEvent } from 'react';
 
 import { classNames } from '@/lib/class-names';
 
@@ -19,11 +19,6 @@ type MagneticProps = {
   /** Accessible name, where the word and its mark do not read as one. */
   label?: string;
   className?: string;
-  /** Applied to the inner span, which trails the anchor at half the pull. */
-  textClassName?: string;
-  strength?: number;
-  target?: string;
-  children?: ReactNode;
   onHoverStart?: () => void;
   onHoverEnd?: () => void;
   /**
@@ -35,15 +30,14 @@ type MagneticProps = {
 };
 
 /** Pixels of lean at the far edge of the element, before the pull falls off. */
-const DEFAULT_STRENGTH = 100;
+const STRENGTH = 100;
 
 /**
  * A link that leans toward the cursor.
  *
- * The lean itself is `useMagneticPull`, which the composer shares. What is left
- * here is the markup and one decision inside it: the label trails the shape it
- * sits in at half the pull, so the pair flexes rather than reading as one rigid
- * object being dragged around.
+ * The lean itself is `useMagneticPull`. What is left here is the markup and one
+ * decision inside it: the label trails the shape it sits in at half the pull, so
+ * the pair flexes rather than reading as one rigid object being dragged around.
  */
 export function Magnetic({
   href,
@@ -51,20 +45,15 @@ export function Magnetic({
   accent,
   label,
   className,
-  textClassName,
-  strength = DEFAULT_STRENGTH,
-  target,
   onHoverStart,
   onHoverEnd,
   onClick,
 }: MagneticProps) {
-  const { pull, drift, track, release } = useMagneticPull(strength);
+  const { pull, drift, track, release } = useMagneticPull(STRENGTH);
 
   return (
     <MotionLink
       href={href}
-      target={target}
-      rel={target === '_blank' ? 'noopener noreferrer' : undefined}
       aria-label={label ?? `${text}${accent ?? ''}`}
       style={{ x: pull.x, y: pull.y }}
       className={classNames('inline-flex items-center justify-center', className)}
@@ -84,7 +73,7 @@ export function Magnetic({
       <motion.span
         aria-hidden
         style={{ x: drift.x, y: drift.y }}
-        className={classNames('inline-block whitespace-nowrap', textClassName)}
+        className="inline-block whitespace-nowrap"
       >
         {text}
         {accent && <span className="text-accent">{accent}</span>}

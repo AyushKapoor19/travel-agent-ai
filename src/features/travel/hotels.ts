@@ -2,14 +2,14 @@ import 'server-only';
 
 import { z } from 'zod';
 
-import { imageProvider } from '@/features/photos/server';
-import { cacheKey, createTtlCache } from '@/features/serpapi/cache';
+import { cachedList, cacheKey, createTtlCache } from '@/features/serpapi/cache';
 import { serpApiSearch } from '@/features/serpapi/client';
 import { SerpApiEngine } from '@/features/serpapi/constants';
 import { numericField } from '@/features/serpapi/schema';
 import { placeNameKey } from '@/lib/place-name-key';
 
 import { BookingProvider, hotelSearchUrl } from './booking-links';
+import { withPlaceImages } from './place-images';
 import type { BudgetLevel, HotelProvider, HotelQuery, HotelResult } from './types';
 
 /**
@@ -109,15 +109,7 @@ const hotelsResponseSchema = z.object({
   properties: z.array(propertySchema).optional(),
 });
 
-/**
- * A stay before it has a photograph.
- *
- * The cache holds these rather than finished results, because the two halves have
- * nothing to do with each other: the search is metered by SerpApi and worth
- * remembering, while the photograph is decoration that a caller may not want at
- * all. Cached together, a rate-only lookup would either poison the entry a card
- * later reads or need its own cache key and its own paid search.
- */
+/** A stay before it has a photograph. See `withPlaceImages` for why the two are split. */
 type HotelDraft = Omit<HotelResult, 'image'>;
 
 const hotelsCache = createTtlCache<HotelDraft[]>();
@@ -143,31 +135,17 @@ const serpApiHotelProvider: HotelProvider = {
       query.guests,
     );
 
-    const cached = hotelsCache.read(key);
-    const drafts = cached ? (cached.value ?? []) : await buildHotels(query, destination);
-
-    if (!cached) hotelsCache.write(key, drafts.length > 0 ? drafts : null);
+    const drafts = await cachedList(hotelsCache, key, () => buildHotels(query, destination));
     if (drafts.length === 0) return [];
 
     return query.withImages === false
-      ? drafts.map((draft) => ({ ...draft, image: null }))
-      : withImages(drafts, destination);
+      ? drafts.map((draft) => toResult(draft, null))
+      : withPlaceImages(drafts, destination, toResult);
   },
 };
 
-/** Batched into one round trip: the image provider paces its outbound calls. */
-async function withImages(
-  drafts: readonly HotelDraft[],
-  destination: string,
-): Promise<HotelResult[]> {
-  const images = await imageProvider().lookup(
-    drafts.map((draft) => imageQuery(draft.name, destination)),
-  );
-
-  return drafts.map((draft) => ({
-    ...draft,
-    image: images.get(imageQuery(draft.name, destination)) ?? null,
-  }));
+function toResult(draft: HotelDraft, image: HotelResult['image']): HotelResult {
+  return { ...draft, image };
 }
 
 type Property = z.infer<typeof propertySchema>;
@@ -285,11 +263,6 @@ async function buildHotels(query: HotelQuery, destination: string): Promise<Hote
 
 /** Google returns around eighteen; a grid of four is what the conversation shows. */
 const MAX_RESULTS = 4;
-
-/** Scoped to the destination, so a chain hotel is not looked up in the wrong city. */
-function imageQuery(name: string, destination: string): string {
-  return `${name} ${destination}`;
-}
 
 /**
  * The provider in use. The single seam a different source is swapped in at, and

@@ -35,7 +35,6 @@ type AnswerFieldProps = {
   focusKey?: string;
   /** Written under the rule on the intake, where the field is the whole interface. */
   hint?: string;
-  className?: string;
 };
 
 /**
@@ -67,7 +66,6 @@ export function AnswerField({
   id = 'answer',
   focusKey,
   hint,
-  className,
 }: AnswerFieldProps) {
   const field = useRef<HTMLTextAreaElement>(null);
   const armed = value.trim().length > 0;
@@ -100,7 +98,6 @@ export function AnswerField({
         event.preventDefault();
         onSubmit();
       }}
-      className={className}
     >
       <div className="field-rule flex items-end gap-4 pb-2.5">
         <label htmlFor={id} className="sr-only">

@@ -5,8 +5,8 @@ import { motion } from 'motion/react';
 import type { DestinationSuggestion, ReasonKind } from '@/features/travel/types';
 import { SPRING, stagger } from '@/lib/design/motion';
 import { formatPrice } from '@/lib/format';
-import { placeNameKey } from '@/lib/place-name-key';
 
+import { photoCaption } from './photo-caption';
 import { Plate } from './plate';
 
 /**
@@ -69,7 +69,7 @@ export function DestinationCard({ destination, index }: DestinationCardProps) {
         seed={destination.id}
         fallbackLabel={country}
         image={image}
-        caption={photoCaption(destination)}
+        caption={photoCaption(destination.image, destination.city)}
       />
 
       <div className="mt-3.5 flex flex-1 flex-col">
@@ -162,12 +162,4 @@ function costLine(cost: NonNullable<DestinationSuggestion['cost']>): string {
   }
 
   return nightly;
-}
-
-/** Undefined when the photo is of the city itself, which needs no qualifying. */
-function photoCaption({ image, city }: DestinationSuggestion): string | undefined {
-  const subject = image?.subject;
-  if (!subject) return undefined;
-
-  return placeNameKey(subject) === placeNameKey(city) ? undefined : 'Nearby';
 }

@@ -6,6 +6,7 @@ import { nightsBetween } from '@/lib/time';
 import { activityProvider } from './activities';
 import { flightProvider } from './flights';
 import { hotelProvider } from './hotels';
+import { quotedCheapestFirst } from './rates';
 import type {
   ActivityResult,
   CostEstimate,
@@ -145,9 +146,7 @@ function lodgingFor(
     if (priced) return priced;
   }
 
-  const cheapest = [...hotels]
-    .filter((hotel) => hotel.pricePerNight !== null && hotel.pricePerNight > 0)
-    .sort((a, b) => (a.pricePerNight ?? 0) - (b.pricePerNight ?? 0))[0];
+  const cheapest = quotedCheapestFirst(hotels)[0];
 
   return cheapest ? priceOf(cheapest, nights, 'cheapest') : null;
 }

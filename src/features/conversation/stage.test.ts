@@ -178,7 +178,7 @@ describe('readStage', () => {
    * call alone that paragraph took the document's place — so the seven days the
    * traveller had just been given went off the screen and the fares became the plan.
    */
-  it('adds a follow-up search to the document instead of replacing it', () => {
+  it('leaves a follow-up search in the thread with the answer it belongs to', () => {
     const plan = assistant(ITINERARY, [hotelSearch()]);
     const asked = user('what would the flights cost?');
     const priced = assistant('About $940 for the two of you.', [flightSearch()]);
@@ -186,10 +186,11 @@ describe('readStage', () => {
     const stage = readStage([plan, asked, priced], false);
 
     expect(planText(stage)).toBe(ITINERARY);
-    expect(toolTypes(stage)).toEqual([
-      `tool-${TOOL_NAMES.SEARCH_HOTELS}`,
-      `tool-${TOOL_NAMES.SEARCH_FLIGHTS}`,
-    ]);
+    // The fares are drawn beside the sentence about them, not lifted up beside the
+    // stays a screen away.
+    expect(toolTypes(stage)).toEqual([`tool-${TOOL_NAMES.SEARCH_HOTELS}`]);
+    if (stage.kind !== StageKind.PLAN) throw new Error('expected the plan');
+    expect(stage.followUps.map((message) => message.id)).toEqual([asked.id, priced.id]);
   });
 
   /** And its prose stays in the conversation, where it was an answer to a question. */
@@ -205,16 +206,48 @@ describe('readStage', () => {
   });
 
   /**
-   * And the other half: an adjustment that genuinely rebuilds the trip writes days of
-   * its own, which is the moment it earns the document.
+   * The whole point of the shape. A change to the trip is written underneath the trip,
+   * because everything before the document is off the screen by construction — so a
+   * revision that took the document's place would take the plan it revises, and the
+   * conversation that produced it, down with it.
    */
-  it('replaces the document once a rebuilt trip has written a day', () => {
+  it('keeps the delivered plan as the document when a day is rewritten', () => {
+    const plan = assistant(ITINERARY);
+    const asked = user('put the museum on day 1 instead');
+    const revised = assistant('Day 1 shifts to Ueno.\n\n## Day 1: Ueno');
+
+    const stage = readStage([plan, asked, revised], true);
+
+    expect(planText(stage)).toBe(ITINERARY);
+    if (stage.kind !== StageKind.PLAN) throw new Error('expected the plan');
+    expect(stage.followUps.map((message) => message.id)).toEqual([asked.id, revised.id]);
+  });
+
+  /** Including a rebuild large enough to be a different trip. It is still an answer. */
+  it('keeps the document when the whole trip is written again', () => {
     const first = assistant(ITINERARY);
+    const asked = user('try Osaka instead');
     const revised = assistant('Osaka, then.\n\n## Day 1: Namba', [hotelSearch()]);
 
-    const stage = readStage([first, user('try Osaka instead'), revised], true);
+    const stage = readStage([first, asked, revised], true);
 
-    expect(planText(stage)).toContain('Namba');
+    expect(planText(stage)).toBe(ITINERARY);
+    if (stage.kind !== StageKind.PLAN) throw new Error('expected the plan');
+    expect(stage.followUps.map((message) => message.id)).toEqual([asked.id, revised.id]);
+  });
+
+  /**
+   * The exception, and the only one: before any reply has written a day the newest plan
+   * is the document. That is the shortlist and the build that answers it — the
+   * shortlist stops being the answer the moment a city is picked.
+   */
+  it('hands the document to the trip built from a shortlist', () => {
+    const shortlist = assistant('Three that fit.', [hotelSearch()]);
+    const built = assistant(ITINERARY, [flightSearch()]);
+
+    const stage = readStage([shortlist, user('Tokyo'), built], true);
+
+    expect(planText(stage)).toBe(ITINERARY);
     if (stage.kind !== StageKind.PLAN) throw new Error('expected the plan');
     expect(stage.followUps).toEqual([]);
   });
