@@ -149,6 +149,15 @@ Every field is nullable, which matters more than it sounds: null and empty strin
 answers, and letting the model fill gaps rather than report absences is how a brief acquires facts
 nobody stated.
 
+**Two models, one per kind of turn** ([`features/agent/provider.ts`](src/features/agent/provider.ts))
+— interview questions and extraction go to `gemini-flash-lite-latest`, planning goes to
+`gemini-3.6-flash`. The split is latency: those turns are short and mechanical, and the reasoning
+model spends 100+ thinking tokens deciding how to ask someone how many people are coming. Temperature
+follows the same logic — 0.6 for the interview, where the question has already been chosen for it and
+drifting off it is the only failure mode, and 0.7 for the itinerary, which is the one turn meant to
+read as written rather than generated. No other file names a model, so switching to Claude or OpenAI
+is a change to this one.
+
 **Prompts** ([`features/agent/prompt.ts`](src/features/agent/prompt.ts)) — three of them rather than
 one, because the turns want opposite behaviour. A question turn asks exactly one thing and writes two
 sentences; a planning turn calls six tools and then writes at length; a shortlist turn proposes
@@ -174,6 +183,18 @@ built from validated tool output and never from parsing the model's text, so mal
 reach the UI and the prose can't contradict the card sitting next to it. The system prompt also
 forbids naming any stay or activity that didn't come from a tool result, which is why the prices in
 the itinerary always match the prices on the cards.
+
+**Streaming** ([`features/agent/turn.ts`](src/features/agent/turn.ts)) — the route opens a single
+`createUIMessageStream` and merges whatever the turn produces into it, so a one-line question and a
+full planning run look the same to the client. The planning turn is an agent loop capped at eight
+tool-call rounds, which covers the weather, a hotel search, two or three activity searches, the fares,
+the total and the prose; the SDK's default of one step ends the run on the first tool call and never
+writes an itinerary. Alongside the text the server writes transient data parts — `data-brief` for the
+state the progress dots read, `data-phase` so the layout can switch to the document before any content
+arrives, and `data-rejection` for a reply that was handed back. The cards then read each tool call's
+own lifecycle (`input-streaming`, `output-available`, `output-error`), so a band draws its skeleton as
+soon as the model starts filling in the call and fills in when the provider answers, instead of the
+whole plan appearing at once at the end.
 
 ### Where I deliberately don't use the model
 
