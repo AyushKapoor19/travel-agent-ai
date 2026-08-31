@@ -36,6 +36,8 @@ yarn-error.log*
 
 # env files 
 .env*
+# ...but the template is the setup instructions: README opens with `cp .env.example .env.local`.
+!.env.example
 
 # vercel
 .vercel

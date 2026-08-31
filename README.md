@@ -3,10 +3,18 @@
 A travel agent chatbot. You type one sentence about the trip you want, it asks a few follow-up
 questions, then searches real hotels, flights and activities and gives you a day-by-day itinerary.
 
+**Live:** [travel-agent-ai-three.vercel.app](https://travel-agent-ai-three.vercel.app/)
+
+The deployment runs on the free tiers of both APIs — Gemini allows 20 requests a day and a single
+planning turn spends several — so a shared link will run out of quota long before it runs out of
+interest. Run it locally with your own keys to see it work end to end.
+
 ## Getting started
 
-Needs Node 20+ (Tailwind v4's native binary requires it; on Node 18 npm skips it silently and you get
-a confusing "Cannot find native binding" at build time). There's an `.nvmrc`.
+Needs Node 22 — `engines` pins it, and there's an `.nvmrc` to match. The floor is really Node 20
+(Tailwind v4's native binary requires it; on Node 18 npm skips it silently and you get a confusing
+"Cannot find native binding" at build time), but the version is pinned rather than left open so a
+new Node major can't change the build under you.
 
 ```bash
 nvm use
@@ -233,7 +241,7 @@ redeclares the palette and everything inside follows.
   raise a configuration error rather than inventing results. Weather and photos need no key, so a
   shortlist still ranks on real climate and just carries no prices.
 - `SCRAPINGDOG_KEY` / `SERP_VENDOR` — optional alternative vendor for stays and fares. Fares are
-  one-way only and activities fall back to SerpApi; see `.env.example`.
+  one-way only and activities fall back to SerpApi, so a SerpApi key is still worth setting.
 - `TRAVEL_AGENT_MODEL` — optional, defaults to `gemini-3.6-flash`.
 - `TRAVEL_AGENT_FAST_MODEL` — optional, for interview questions and extraction where a reasoning pass
   only adds latency. Defaults to `gemini-flash-lite-latest`.
@@ -247,8 +255,8 @@ implements a newer language-model spec than `ai` v6 accepts.
 Split along the line that matters: what's deterministic vs. what's a model reading a sentence. Mixing
 them gives you a suite that costs money, fails intermittently, and gets muted.
 
-- **`npm test`** — 186 assertions over pure logic, offline, ~300ms. Mostly negative assertions, since
-  the bugs above are what it exists to pin shut.
+- **`npm test`** — 239 tests over pure logic, offline, ~400ms. Mostly negative assertions, since the
+  bugs above are what it exists to pin shut.
 - **`npm run eval`** — 59 checks over 29 sentences against a live Gemini. Assertions are about
   downstream consequence rather than string equality: whether the model writes "Europe" or "somewhere
   in Europe" changes nothing, but whether "under $2000" reaches `maxTotalUsd` as `2000` decides whether
