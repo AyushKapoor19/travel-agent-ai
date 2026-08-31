@@ -2,7 +2,6 @@
 
 import { Markdown } from '@/components/ui/markdown';
 import { RouteWait } from '@/components/ui/route-wait';
-import { textFromParts } from '@/features/agent/message-text';
 import type { WayfareMessagePart } from '@/features/agent/messages';
 import { isBandTitle } from '@/features/conversation/cards/band-titles';
 import { ToolResult } from '@/features/conversation/tool-results';
@@ -11,6 +10,7 @@ import type { TripBrief } from '@/features/trip/brief';
 import { planBands } from './bands';
 import { DaySection } from './day-section';
 import { splitItinerary } from './parse';
+import { planProse } from './prose';
 import { TripMasthead } from './trip-masthead';
 import { useDayImages } from './use-day-images';
 
@@ -44,7 +44,7 @@ type ItineraryDocumentProps = {
  * the days will be.
  */
 export function ItineraryDocument({ brief, parts, writing }: ItineraryDocumentProps) {
-  const { intro, days, notes } = splitItinerary(textFromParts(parts));
+  const { intro, days, notes } = splitItinerary(planProse(parts));
 
   // One lookup for the whole plan. Held here rather than in each section so the
   // days are one request between them instead of one apiece.

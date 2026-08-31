@@ -224,6 +224,28 @@ const ADJUSTMENT_RULES = `If the trip has already been written, this turn adds t
 - Write the whole itinerary out again only when they ask you to — "show me the full plan", "put it all together". It is a request you answer, never something you do on your own because a lot has changed.`;
 
 /**
+ * The instruction against thinking out loud.
+ *
+ * A reasoning model handed a prompt that opens "decide which of two turns this is"
+ * and continues "first call your tools" will, often enough to matter, answer the
+ * prompt instead of doing the job — and what reached the page was the brief read
+ * back as a bulleted list, then the five searches written out with their arguments,
+ * then "Let's do the required tool calls". None of it has a heading in it, so the
+ * whole recital landed in the opening paragraph and was set as the lede of the
+ * itinerary, above a page of cards drawing the very searches it was describing.
+ *
+ * The rules are phrased as things not to write rather than as "be concise", because
+ * the model was not being verbose. It was being obedient to a prompt that reads like
+ * a form, and the fix is to say that the form is not the answer.
+ */
+const NO_NARRATION = `Never narrate this turn:
+- Do not restate the brief or list what you already know. It is given to you below, and reading it back is not information to someone who just told you all of it.
+- Do not announce which kind of turn you have decided this is. Decide, and act on it.
+- Do not write out the calls you are about to make, their arguments, or why you are skipping one. Just make them. Every search draws itself on the page as it runs, so a written list of the same searches is the same thing twice, in the worse form.
+- No "let's", no "first I'll", no "now I will", no checklists of your own work.
+- The first words you write are the first words the traveler reads: the opening line of the trip, the shortlist, or the answer to what they asked. Nothing comes before them.`;
+
+/**
  * The payoff turn: the brief is complete, so search for real options and write
  * the itinerary around what comes back.
  */
@@ -256,6 +278,7 @@ Then write the itinerary:
 The days and "## Good to know" are the only headings you write. The stays, the things to do, the climate, the fares and the cost breakdown are all drawn from the tool results already, above your prose and each under a heading of its own — so a "## Weather", "## Where to stay" or "## Trip cost" section of yours prints the same heading on the same page twice, over a chart or a set of photographs that says it better. Say what the weather means for the plan inside the day it affects, and give the total at most one clause: what it leaves them, or what it excludes. Never the arithmetic, and never a URL or a price list.`,
     SHORTLIST_RULES,
     ADJUSTMENT_RULES,
+    NO_NARRATION,
     HONESTY,
     WEATHER_HONESTY,
     CULTURAL_INSIGHT,

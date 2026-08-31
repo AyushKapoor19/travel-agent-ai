@@ -7,6 +7,7 @@ import type { WayfareUIMessage } from '@/features/agent/messages';
 import { planBands } from '@/features/itinerary/bands';
 import { ItineraryRevision } from '@/features/itinerary/itinerary-revision';
 import { looksLikeItinerary } from '@/features/itinerary/parse';
+import { planProse } from '@/features/itinerary/prose';
 
 import { ToolResult } from './tool-results';
 
@@ -29,7 +30,9 @@ type FollowUpReplyProps = {
  * scrolled past twenty seconds ago. They belong to the question that produced them.
  */
 function FollowUpReply({ message, destination }: FollowUpReplyProps) {
-  const text = messageText(message);
+  // Anything said before the searches finished is the model narrating them, and is
+  // dropped here for the same reason it is dropped in the document.
+  const text = planProse(message.parts);
   // Deduplicated within the one reply: the model prices a trip, settles on a different
   // stay and prices it again, and two totals a screen apart are worse than either.
   const bands = planBands(message.parts);

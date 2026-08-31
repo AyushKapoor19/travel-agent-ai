@@ -38,8 +38,15 @@ export type RunTurnOptions = {
   brief: TripBrief;
 };
 
-/** Merged without start/finish frames: the writer owns the message envelope. */
-const MERGE_OPTIONS = { sendStart: false, sendFinish: false } as const;
+/**
+ * Merged without start/finish frames: the writer owns the message envelope.
+ *
+ * Reasoning is withheld as well. The planning model thinks before it answers and
+ * none of that is written for a traveller — it is the brief read back, the searches
+ * rehearsed, the turn classified — so sending it costs bandwidth to ship prose the
+ * client is only going to filter out.
+ */
+const MERGE_OPTIONS = { sendStart: false, sendFinish: false, sendReasoning: false } as const;
 
 export async function runTurn({
   writer,
