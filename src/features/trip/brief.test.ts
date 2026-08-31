@@ -54,7 +54,27 @@ describe('missingDateDetail', () => {
    * window has nothing to quote and the cost line silently disappears.
    */
   it('asks for the window when only a duration is known', () => {
-    expect(missingDateDetail(briefWith({ dates: '5 days' }))).toBe('window');
+    expect(missingDateDetail(briefWith({ dates: '5 days', nights: 5 }))).toBe('window');
+  });
+
+  /**
+   * The half that used to come back inverted, and the reason `nights` exists.
+   *
+   * "Tokyo in cherry blossom season" states the time of year and no length, and both
+   * it and "five days in Lisbon" leave `startDate` unresolved — so a rule reading the
+   * missing half off the resolved dates gave the same answer to both. This one got
+   * the follow-up written for the other: "you've said how long you want to go for but
+   * not when", to somebody who had said only when.
+   */
+  it('asks for the duration when only a window is known', () => {
+    expect(missingDateDetail(briefWith({ dates: 'cherry blossom season' }))).toBe('duration');
+  });
+
+  /** Both halves given and still unresolved means the timing is what did not land. */
+  it('asks for the window when both were given and nothing resolved', () => {
+    expect(missingDateDetail(briefWith({ dates: 'a week after the rains', nights: 7 }))).toBe(
+      'window',
+    );
   });
 
   /**
@@ -83,9 +103,14 @@ describe('missingDateDetail', () => {
     );
   });
 
-  it('treats a same-day window as no window at all', () => {
+  /**
+   * A single day is a date and not a stay, so the step stays open — but what it is
+   * missing is the length, not the timing. They named the eighteenth; asking which
+   * part of the year they had in mind would be asking for what they just gave.
+   */
+  it('asks for the duration when the window is a single day', () => {
     expect(missingDateDetail(briefWith({ startDate: '2026-09-18', endDate: '2026-09-18' }))).toBe(
-      'window',
+      'duration',
     );
   });
 });

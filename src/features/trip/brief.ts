@@ -55,6 +55,13 @@ export const BriefLimits = {
   ANSWERED: 24,
   MIN_TRAVELERS: 1,
   MAX_TRAVELERS: 30,
+  /**
+   * The longest stated length worth recording. Well past `MAX_PLANNED_NIGHTS`,
+   * because this is what they said rather than what we will plan — a stated three
+   * months is a real answer to "how long", and one this app should record and then
+   * say it cannot plan, rather than silently fail to read.
+   */
+  MAX_STATED_NIGHTS: 90,
   MAX_RETRIES: 5,
   MAX_REJECTIONS: 5,
   /** Generous, and only here so a misread "$200000" cannot pass through as a budget. */
@@ -90,6 +97,24 @@ export const tripBriefSchema = z.object({
 
   /** The traveler's own words, e.g. "first week of October" or "5 nights". */
   dates: z.string().trim().max(BriefLimits.DATES).default(''),
+  /**
+   * How long they said the trip is, in nights, when they have said it.
+   *
+   * Held apart from `dates` because the dates question has two halves and the
+   * prose cannot tell them apart. "Five days in Lisbon" and "Tokyo in cherry
+   * blossom season" both land in `dates` as a non-empty string, and both leave the
+   * trip unpriceable — but they are missing opposite halves, and the follow-up
+   * question has to ask for the one that is actually absent. Reading that off the
+   * words was what the old version tried and could not do: it inferred the missing
+   * half from whether the dates had resolved, which is the same answer for both.
+   */
+  nights: z.coerce
+    .number()
+    .int()
+    .positive()
+    .max(BriefLimits.MAX_STATED_NIGHTS)
+    .nullable()
+    .default(null),
   /** Resolved during extraction so hotel search has concrete check-in/out. */
   startDate: z.string().trim().max(BriefLimits.DATE_VALUE).default(''),
   endDate: z.string().trim().max(BriefLimits.DATE_VALUE).default(''),
@@ -183,11 +208,31 @@ export const MAX_PLANNED_NIGHTS = 21;
  * itself.
  */
 export function missingDateDetail(brief: TripBrief): 'window' | 'duration' | null {
-  const nights = tripNights(brief);
+  const resolved = tripNights(brief);
 
-  if (nights === null || nights <= 0) return 'window';
-  if (nights > MAX_PLANNED_NIGHTS) return 'duration';
-  return null;
+  if (resolved !== null && resolved > 0) {
+    return resolved > MAX_PLANNED_NIGHTS ? 'duration' : null;
+  }
+
+  /*
+   * Nothing usable resolved, so name the half they have actually not given.
+   *
+   * This used to answer 'window' for every unresolved brief, which was right by
+   * accident for "five days in Lisbon" and exactly backwards for "Tokyo in cherry
+   * blossom season" — the second names the time of year and not the length, and got
+   * a follow-up opening "you've said how long you want to go for but not when".
+   * Telling someone their own answer was the other answer is worse than asking the
+   * plain question, because it reads as not having listened.
+   *
+   * When both halves are on the brief and the dates still did not resolve, the
+   * timing is what failed: a length is a number and cannot be half-understood, while
+   * "sometime after the rains" is a window nobody can book. So that case asks for
+   * the window too.
+   */
+  const hasLength = brief.nights !== null;
+  const hasTiming = brief.dates.length > 0 || brief.startDate.length > 0;
+
+  return hasTiming && !hasLength ? 'duration' : 'window';
 }
 
 /** Nights between resolved dates, or null when dates are still flexible. */

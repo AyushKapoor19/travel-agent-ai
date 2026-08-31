@@ -24,6 +24,7 @@ type Reading = {
   destination: string | null;
   origin: string | null;
   dates: string | null;
+  durationNights: number | null;
   startDate: string | null;
   endDate: string | null;
   budgetLevel: 'budget' | 'mid-range' | 'luxury' | null;
@@ -55,6 +56,7 @@ const NOTHING: Reading = {
   destination: null,
   origin: null,
   dates: null,
+  durationNights: null,
   startDate: null,
   endDate: null,
   budgetLevel: null,
@@ -100,6 +102,59 @@ const knownEverything = briefWith({
 
 beforeEach(() => {
   generateObject.mockReset();
+});
+
+/**
+ * The two halves of the dates question, which the landing page hands over already
+ * half-answered.
+ *
+ * "Five days in Lisbon" and "A week in Tokyo in cherry blossom season" are openers
+ * this app offers, and each answers one half of a question that has two. The length
+ * has to survive as a number rather than as prose: `dates` holds both halves as the
+ * traveller worded them and cannot be asked which one is present, so a follow-up
+ * built on it asked the wrong half — it told someone who had named a season that
+ * they had given a length.
+ */
+describe('a reply that gives one half of the dates', () => {
+  it('records a stated length as a number', async () => {
+    reads({ dates: 'five days', durationNights: 5 });
+
+    const result = await extractBrief(
+      emptyTripBrief,
+      stepFor('destination'),
+      'Five days in Lisbon',
+    );
+
+    expect(result.brief.nights).toBe(5);
+    expect(result.unusable).toBeNull();
+  });
+
+  it('leaves the length null when only a season was named', async () => {
+    reads({ dates: 'cherry blossom season' });
+
+    const result = await extractBrief(
+      emptyTripBrief,
+      stepFor('destination'),
+      'Tokyo in cherry blossom season',
+    );
+
+    expect(result.brief.nights).toBeNull();
+    expect(result.brief.dates).toBe('cherry blossom season');
+  });
+
+  /** A length is worth writing down on its own, so it counts as having read something. */
+  it('counts a length as an answer even when nothing else came back', async () => {
+    reads({ durationNights: 7 });
+
+    const result = await extractBrief(
+      briefWith({ destination: 'Tokyo' }),
+      stepFor('dates'),
+      'about a week',
+    );
+
+    expect(result.brief.nights).toBe(7);
+    expect(result.unusable).toBeNull();
+  });
 });
 
 describe('a reading that only repeats what the model was told', () => {

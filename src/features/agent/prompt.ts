@@ -1,7 +1,13 @@
 import 'server-only';
 
 import type { TripBrief } from '@/features/trip/brief';
-import { describeTrip, isDestinationOpen, missingDateDetail } from '@/features/trip/brief';
+import {
+  describeTrip,
+  isDestinationOpen,
+  MAX_PLANNED_NIGHTS,
+  missingDateDetail,
+  tripNights,
+} from '@/features/trip/brief';
 import type { FlowStep } from '@/features/trip/flow';
 import { todayIsoDate } from '@/lib/format';
 
@@ -127,8 +133,35 @@ function declinedNote(question: string): string {
 
 const DATE_DETAIL_NOTES = {
   window: `They have said how long they want to go for but not when. Ask only for the missing half — roughly which month or which part of the year — acknowledging the length they gave rather than asking for it again. Do not explain why you need it.`,
-  duration: `They have named a stretch of the calendar but not how long they want to be away, so as it stands this reads as a three-week-plus trip. Ask only how long they want to go for, acknowledging the timing they gave. Do not explain why you need it.`,
+  duration: `They have named when they want to travel but not how long they want to be away. Ask only for the length, acknowledging the timing they gave rather than asking for it again. Do not explain why you need it.`,
+  span: `They have named a stretch of the calendar but not how long they want to be away, so as it stands this reads as a three-week-plus trip. Ask only how long they want to go for, acknowledging the timing they gave. Do not explain why you need it.`,
 } as const;
+
+/**
+ * Which half of the dates question is still open, or none.
+ *
+ * Which half is `missingDateDetail`'s answer; all this adds is telling the two ways
+ * of missing a length apart. A brief whose dates resolved to more than three weeks
+ * has an implausible span to point at — "next month" read as all of next month — and
+ * one that named only a season has nothing resolved at all. Both need the length, and
+ * only the first can be explained by saying the trip currently reads as three weeks.
+ *
+ * Returns null when neither half has been given, because there is no partial answer
+ * to acknowledge and the step's own directive already asks for both. That guard is
+ * the reason this is a function: asking for "the missing half" of an empty answer
+ * produced a question that thanked the traveller for a length they never gave.
+ */
+function dateNoteFor(brief: TripBrief): keyof typeof DATE_DETAIL_NOTES | null {
+  const missing = missingDateDetail(brief);
+  if (!missing) return null;
+
+  if (missing === 'duration') {
+    const resolved = tripNights(brief);
+    return resolved !== null && resolved > MAX_PLANNED_NIGHTS ? 'span' : 'duration';
+  }
+
+  return brief.nights !== null ? 'window' : null;
+}
 
 /**
  * The interview turns. The server has already decided which question comes
@@ -141,11 +174,10 @@ export function buildQuestionPrompt(
   declined: FlowStep | null = null,
 ): string {
   const known = describeTrip(brief);
-  const missingDates = step.id === 'dates' ? missingDateDetail(brief) : null;
-  // Only once the traveller has actually said something about timing: on the first
-  // pass there is no half to be missing, and the step's own directive asks for both.
-  const dateNote =
-    missingDates && (brief.dates || brief.startDate) ? DATE_DETAIL_NOTES[missingDates] : '';
+  // Only once the traveller has actually given one half of it: on the first pass
+  // there is no half to be missing, and the step's own directive asks for both.
+  const note = step.id === 'dates' ? dateNoteFor(brief) : null;
+  const dateNote = note ? DATE_DETAIL_NOTES[note] : '';
 
   return [
     PERSONA,

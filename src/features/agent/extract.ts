@@ -43,6 +43,15 @@ const extractionSchema = z.object({
     .string()
     .nullable()
     .describe("The traveler's own words about timing, e.g. 'first week of October'."),
+  durationNights: z
+    .number()
+    .int()
+    .positive()
+    .max(BriefLimits.MAX_STATED_NIGHTS)
+    .nullable()
+    .describe(
+      'How long the trip is, in nights, if they said: 5 for "five days", 7 for "a week", 3 for "a long weekend". Report it even when they gave no dates to hang it on — "five days in Lisbon" states a length and no timing. Null when they named only a time of year, such as "cherry blossom season".',
+    ),
   startDate: z
     .string()
     .nullable()
@@ -154,6 +163,7 @@ const EMPTY_EXTRACTION: Extraction = {
   destination: null,
   origin: null,
   dates: null,
+  durationNights: null,
   startDate: null,
   endDate: null,
   budgetLevel: null,
@@ -206,6 +216,7 @@ function reportedAnything(extraction: Extraction, brief: TripBrief): boolean {
     extraction.travelers !== null ||
     extraction.pace !== null ||
     extraction.extras !== null ||
+    extraction.durationNights !== null ||
     extraction.startDate !== null ||
     extraction.endDate !== null
   ) {
@@ -337,6 +348,7 @@ export async function extractBrief(
     destination: extraction.destination?.trim() || brief.destination,
     origin: extraction.origin?.trim() || brief.origin,
     dates: extraction.dates?.trim() || brief.dates,
+    nights: extraction.durationNights ?? brief.nights,
     startDate: extraction.startDate?.trim() || brief.startDate,
     endDate: extraction.endDate?.trim() || brief.endDate,
     budgetLevel: extraction.budgetLevel ?? brief.budgetLevel,
