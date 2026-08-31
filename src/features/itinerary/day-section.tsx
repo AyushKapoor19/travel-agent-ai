@@ -4,20 +4,9 @@ import { motion } from 'motion/react';
 
 import { Markdown } from '@/components/ui/markdown';
 import { PlacePhoto } from '@/features/photos/place-photo';
+import type { PlaceImage } from '@/features/photos/shared';
 import { photoCreditTitle } from '@/features/photos/shared';
-import { usePlaceImage } from '@/features/photos/use-place-image';
 import { SPRING, stagger } from '@/lib/design/motion';
-import { useSettledValue } from '@/lib/use-settled-value';
-
-import { dayImageQuery } from './day-query';
-
-/**
- * How long a day heading must stop changing before it is worth a photo lookup.
- *
- * Headings arrive a token at a time while the itinerary streams, so querying on every
- * render would fire a request per character.
- */
-const HEADING_SETTLE_MS = 900;
 
 /** A band across a phone, and a plate beside the prose from `sm` up. */
 const PLATE_SIZES = '(max-width: 640px) 100vw, 160px';
@@ -32,8 +21,15 @@ type DaySectionProps = {
   body: string;
   /** Position in the plan, which sets the section's turn in the reveal. */
   index: number;
-  /** Scopes the day's photo lookup, so "Old town" resolves to the right city. */
-  destination: string;
+  /**
+   * The day's photograph, or null while it is still being looked up — and for
+   * good if there is none.
+   *
+   * Passed in rather than looked up here: the whole plan's photographs are
+   * fetched as one batch by the document above, because a lookup per section is
+   * how the tail of an itinerary ends up with nothing to draw.
+   */
+  image: PlaceImage | null;
 };
 
 /** Two digits, so every numeral in the margin sits on the same axis. */
@@ -51,13 +47,7 @@ function pad(number: string | null, index: number): string {
  * and a figure carry the same structure and leave the prose as the only thing with any
  * weight, which is what a guidebook page does.
  */
-export function DaySection({ number, title, body, index, destination }: DaySectionProps) {
-  const query = useSettledValue(
-    destination ? dayImageQuery(title, destination) : null,
-    HEADING_SETTLE_MS,
-  );
-  const image = usePlaceImage(query);
-
+export function DaySection({ number, title, body, index, image }: DaySectionProps) {
   return (
     <motion.article
       initial={{ opacity: 0, y: 14 }}

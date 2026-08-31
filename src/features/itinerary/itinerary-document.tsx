@@ -12,6 +12,7 @@ import { planBands } from './bands';
 import { DaySection } from './day-section';
 import { splitItinerary } from './parse';
 import { TripMasthead } from './trip-masthead';
+import { useDayImages } from './use-day-images';
 
 type ItineraryDocumentProps = {
   brief: TripBrief;
@@ -45,6 +46,10 @@ type ItineraryDocumentProps = {
 export function ItineraryDocument({ brief, parts, writing }: ItineraryDocumentProps) {
   const { intro, days, notes } = splitItinerary(textFromParts(parts));
 
+  // One lookup for the whole plan. Held here rather than in each section so the
+  // days are one request between them instead of one apiece.
+  const dayImages = useDayImages(days, brief.destination);
+
   return (
     <article className="space-y-12">
       <TripMasthead brief={brief} />
@@ -69,7 +74,7 @@ export function ItineraryDocument({ brief, parts, writing }: ItineraryDocumentPr
                 title={day.title}
                 body={day.body}
                 index={index}
-                destination={brief.destination}
+                image={dayImages[index] ?? null}
               />
             ))}
           </div>

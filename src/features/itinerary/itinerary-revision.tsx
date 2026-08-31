@@ -5,6 +5,7 @@ import { isBandTitle } from '@/features/conversation/cards/band-titles';
 
 import { DaySection } from './day-section';
 import { splitItinerary } from './parse';
+import { useDayImages } from './use-day-images';
 
 type ItineraryRevisionProps = {
   /** The reply's prose, which has at least one day heading in it. */
@@ -29,6 +30,7 @@ type ItineraryRevisionProps = {
  */
 export function ItineraryRevision({ text, destination }: ItineraryRevisionProps) {
   const { intro, days, notes } = splitItinerary(text);
+  const dayImages = useDayImages(days, destination);
 
   return (
     <div className="space-y-7">
@@ -45,7 +47,7 @@ export function ItineraryRevision({ text, destination }: ItineraryRevisionProps)
               title={day.title}
               body={day.body}
               index={index}
-              destination={destination}
+              image={dayImages[index] ?? null}
             />
           ))}
         </div>

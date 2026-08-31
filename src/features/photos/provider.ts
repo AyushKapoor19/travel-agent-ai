@@ -96,8 +96,13 @@ export const wikimediaImageProvider: ImageProvider = {
     for (const query of pending) {
       if (results.has(query)) continue;
 
+      // Left out of the map entirely rather than answered with null: the caller
+      // has to be able to tell "nothing here" from "could not find out", or a
+      // rate limit reads as a place with no photograph and nobody asks again.
+      if (throttled.has(query)) continue;
+
       results.set(query, null);
-      if (!throttled.has(query)) writeLookup(query, width, null);
+      writeLookup(query, width, null);
     }
 
     return results;

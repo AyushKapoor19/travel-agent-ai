@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 
 import { whenIdle } from '@/lib/when-idle';
 
@@ -19,26 +19,101 @@ import type { PlaceImage } from './types';
 const IDLE_TIMEOUT_MS = 2500;
 const IDLE_FALLBACK_MS = 1200;
 
-/** One photograph. Pass null to skip the request entirely. */
-export function usePlaceImage(query: string | null): PlaceImage | null {
-  const [image, setImage] = useState<PlaceImage | null>(null);
+/**
+ * How many times a throttled lookup is asked again, and how long it waits.
+ *
+ * The counterpart to the ladder in `<PlacePhoto>`, and it was missing: that one
+ * retries the *bytes* of a photograph six times, while the question of which
+ * photograph it is got exactly one attempt. A rate limit falls on the lookup
+ * first — it is the call an itinerary makes a dozen of — so the half of the
+ * pipeline with no patience was the half that needed it.
+ *
+ * Longer gaps than the photo ladder, because Wikipedia's search limit is a rate
+ * over seconds rather than a queue of four, and coming back quickly is how a
+ * cool-off gets extended rather than waited out.
+ */
+const LOOKUP_RETRIES = 4;
+const LOOKUP_RETRY_BASE_MS = 1500;
+const LOOKUP_RETRY_MAX_MS = 12000;
 
-  useEffect(() => {
-    setImage(null);
-    if (!query) return;
+function retryDelay(attempt: number): number {
+  return Math.min(LOOKUP_RETRY_MAX_MS, LOOKUP_RETRY_BASE_MS * 2 ** attempt);
+}
 
-    const controller = new AbortController();
+/** A pause that ends early when the caller has gone away. */
+function wait(ms: number, signal: AbortSignal): Promise<void> {
+  return new Promise((resolve) => {
+    const finish = () => {
+      clearTimeout(timer);
+      signal.removeEventListener('abort', finish);
+      resolve();
+    };
 
-    fetchPlaceImages([query], { signal: controller.signal })
-      .then((found) => setImage(found[query] ?? null))
-      .catch(() => {
-        // Aborted or offline. The gradient stands in.
+    const timer = setTimeout(finish, ms);
+    signal.addEventListener('abort', finish);
+  });
+}
+
+type LoadOptions = {
+  width?: number;
+  signal: AbortSignal;
+  onImages: (images: Record<string, PlaceImage>) => void;
+};
+
+/**
+ * Asks for a set of photographs, then asks again for whichever ones came back
+ * unanswered, until they are answered or the ladder runs out.
+ *
+ * Results are handed over as they arrive rather than at the end, so the days
+ * that resolved on the first attempt are drawn immediately and the stragglers
+ * fade in behind them.
+ */
+async function loadWithRetry(queries: readonly string[], options: LoadOptions): Promise<void> {
+  let remaining = queries;
+
+  for (let attempt = 0; remaining.length > 0; attempt += 1) {
+    let pending: string[];
+
+    try {
+      const result = await fetchPlaceImages(remaining, {
+        width: options.width,
+        signal: options.signal,
       });
 
-    return () => controller.abort();
-  }, [query]);
+      if (options.signal.aborted) return;
+      if (Object.keys(result.images).length > 0) options.onImages(result.images);
 
-  return image;
+      pending = result.pending;
+    } catch {
+      // Aborted, or the network is gone. The first is handled below; the second
+      // is exactly the kind of thing worth another attempt.
+      if (options.signal.aborted) return;
+      pending = [...remaining];
+    }
+
+    if (pending.length === 0 || attempt >= LOOKUP_RETRIES) return;
+
+    await wait(retryDelay(attempt), options.signal);
+    if (options.signal.aborted) return;
+
+    remaining = pending;
+  }
+}
+
+export type UsePlaceImageOptions = {
+  /** Source width to request, for photographs drawn smaller than the default. */
+  width?: number;
+};
+
+/** One photograph. Pass null to skip the request entirely. */
+export function usePlaceImage(
+  query: string | null,
+  { width }: UsePlaceImageOptions = {},
+): PlaceImage | null {
+  const queries = useMemo(() => (query ? [query] : []), [query]);
+  const images = usePlaceImages(queries, { width });
+
+  return query ? (images[query] ?? null) : null;
 }
 
 export type UsePlaceImagesOptions = {
@@ -57,9 +132,12 @@ export type UsePlaceImagesOptions = {
 /**
  * A set of photographs, fetched together and keyed by query.
  *
- * One state update for the whole set rather than one per photograph, because the
+ * One state update per batch rather than one per photograph, because the
  * surfaces that need this are already being moved every frame and re-rendering
  * eight times mid-animation is visible.
+ *
+ * `queries` is a hook dependency, so callers must hand over a stable array —
+ * module scope for a fixed set, `useMemo` for a computed one.
  */
 export function usePlaceImages(
   queries: readonly string[],
@@ -68,16 +146,18 @@ export function usePlaceImages(
   const [images, setImages] = useState<Record<string, PlaceImage>>({});
 
   useEffect(() => {
+    if (queries.length === 0) return;
+
     const controller = new AbortController();
 
     const load = () => {
-      fetchPlaceImages(queries, { width, signal: controller.signal })
-        .then((found) => {
-          if (Object.keys(found).length > 0) setImages(found);
-        })
-        .catch(() => {
-          // Aborted or offline. The tiles keep their flat fill.
-        });
+      void loadWithRetry(queries, {
+        width,
+        signal: controller.signal,
+        // Merged rather than replaced: a retry carries only the stragglers, and
+        // assigning it wholesale would drop the photographs already on screen.
+        onImages: (found) => setImages((current) => ({ ...current, ...found })),
+      });
     };
 
     if (!deferUntilIdle) {

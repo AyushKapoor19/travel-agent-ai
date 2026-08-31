@@ -36,7 +36,16 @@ export type LookupOptions = {
 
 export type ImageProvider = {
   name: string;
-  /** Batched on purpose: one itinerary needs a dozen lookups at once. */
+  /**
+   * Batched on purpose: one itinerary needs a dozen lookups at once.
+   *
+   * Three answers, and the difference between the last two is the whole reason
+   * this returns a map rather than a record. A `PlaceImage` is a photograph; a
+   * null is a place the upstream has nothing usable for; an *absent* key is a
+   * question that could not be asked, because the upstream was rate limiting.
+   * Only the middle one is worth remembering, and only the last one is worth
+   * asking again.
+   */
   lookup(
     queries: readonly string[],
     options?: LookupOptions,

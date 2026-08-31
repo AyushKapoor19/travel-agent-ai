@@ -17,7 +17,20 @@ import { CacheControl, HttpStatus } from '@/lib/http';
  * provider spends one call per place and a single batched one on the licences.
  */
 
-type LookupResponse = { images: Record<string, PlaceImage | null> };
+/**
+ * `images` holds an answer for every query that got one, null included — null
+ * means the place has no usable photograph and is worth remembering. `pending`
+ * holds the ones Wikipedia declined to answer, which is a fact about this
+ * moment rather than about the place, so the caller is expected to ask again.
+ *
+ * Answering a throttled lookup with null was the bug this replaces: the client
+ * could not tell it apart from a real miss, so a day that happened to land in a
+ * rate-limited burst kept its gradient for the life of the page.
+ */
+type LookupResponse = {
+  images: Record<string, PlaceImage | null>;
+  pending: string[];
+};
 
 function readQueries(params: URLSearchParams): string[] {
   return params
@@ -50,16 +63,26 @@ export async function GET(request: Request) {
   try {
     const found = await imageProvider().lookup(queries, { width: readWidth(params) });
 
-    // Keyed by the query the caller sent, including the ones that found nothing:
-    // a client that asked about eight places should be able to tell "no photo"
-    // from "still waiting".
-    const body: LookupResponse = {
-      images: Object.fromEntries(queries.map((query) => [query, found.get(query) ?? null])),
-    };
+    const images: Record<string, PlaceImage | null> = {};
+    const pending: string[] = [];
 
-    return Response.json(body, { headers: { 'Cache-Control': CacheControl.SHARED_DAY } });
+    for (const query of queries) {
+      if (found.has(query)) images[query] = found.get(query) ?? null;
+      else pending.push(query);
+    }
+
+    return Response.json({ images, pending } satisfies LookupResponse, {
+      // A response holding a query we could not answer must not be stored, or
+      // the retry it is asking for is served the same shrug it just got.
+      headers: {
+        'Cache-Control': pending.length > 0 ? CacheControl.NONE : CacheControl.SHARED_DAY,
+      },
+    });
   } catch {
-    // A missing cover is a non-event; every caller falls back to its gradient.
-    return Response.json({ images: {} } satisfies LookupResponse);
+    // Nothing about the places, so nothing is claimed about them: every query
+    // comes back pending and the caller decides whether to try again.
+    return Response.json({ images: {}, pending: queries } satisfies LookupResponse, {
+      headers: { 'Cache-Control': CacheControl.NONE },
+    });
   }
 }
