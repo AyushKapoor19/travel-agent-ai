@@ -285,17 +285,13 @@ rather than a secret in a JS chunk.
 
 ## Tests and evals
 
-Split along the line that matters — what's deterministic, versus what's a model reading a sentence.
-Mixing the two gives you a suite that costs money, fails intermittently, and gets muted within a week.
+Split by what's deterministic versus what's a model reading a sentence. Mixing the two gives you a
+suite that costs money, fails intermittently, and gets muted within a week.
 
-- **`npm test`** — 241 tests across 21 files, pure logic, offline, ~400ms. Mostly negative assertions,
-  since the bugs above are what it exists to pin shut.
-- **`npm run eval`** — 60 checks over 29 sentences against a live Gemini, asserting on downstream
-  consequence rather than string equality: whether the model writes "Europe" or "somewhere in Europe"
-  changes nothing, but whether "under $2000" reaches `maxTotalUsd` as `2000` decides whether the
-  budget is visible to the ranking at all. The first three cases are the brief's example sentences,
-  verbatim. The negatives carry the weight — "around $150 a night" must not become a whole-trip
-  ceiling, and naming Reykjavík must not be read as asking for cold.
+- **`npm test`** — 251 tests, pure logic, offline, ~400ms. Mostly negative assertions, since the bugs
+  above are what it exists to pin shut.
+- **`npm run eval`** — 60 checks against a live Gemini, asserting on downstream consequence rather
+  than wording: "under $2000" must reach `maxTotalUsd` as `2000`, "around $150 a night" must not.
 
 ```bash
 npm run dev / build / start
