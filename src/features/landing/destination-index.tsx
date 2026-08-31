@@ -8,7 +8,11 @@ import { usePlaceImages } from '@/features/photos/use-place-image';
 import { classNames } from '@/lib/class-names';
 import { gradientCss } from '@/lib/design/gradient';
 
-import { DESTINATION_QUERIES, FEATURED_DESTINATIONS } from './featured-destinations';
+import {
+  DESTINATION_QUERIES,
+  destinationPrompt,
+  FEATURED_DESTINATIONS,
+} from './featured-destinations';
 import { useTripHandoff } from './trip-handoff';
 
 /**
@@ -181,17 +185,18 @@ export function DestinationIndex({ live, className }: DestinationIndexProps) {
             // a narrow window it would be a rule drawn darker than its
             // neighbours for a reason nothing on the screen can explain.
             const showing = showPreview && index === active;
+            const prompt = destinationPrompt(destination);
 
             return (
               <li key={destination.city}>
                 <button
                   type="button"
                   disabled={leaving}
-                  onClick={() => start(destination.prompt)}
+                  onClick={() => start(prompt)}
                   onMouseEnter={() => setActive(index)}
                   onFocus={() => setActive(index)}
                   data-active={showing ? '' : undefined}
-                  aria-label={`Plan a trip: ${destination.prompt}`}
+                  aria-label={`Plan a trip to ${prompt}`}
                   className="group flex w-full items-baseline gap-[clamp(0.75rem,1.4vw,1.5rem)] border-b border-line py-[clamp(0.45rem,1.35vh,0.9rem)] text-left transition-colors duration-300 ease-wayfare hover:border-ink disabled:cursor-not-allowed data-[active]:border-ink/45"
                 >
                   <span className="figure w-6 shrink-0 text-[0.6875rem] text-ink-muted transition-colors duration-300 ease-wayfare group-data-[active]:text-ink-soft">
